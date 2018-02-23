@@ -8,12 +8,14 @@ export interface AppState {
     stderr: string;
     log: string;
     processState: ProcessState;
+    restarting: boolean;
 }
 
 export enum ProcessState {
     Stopped = 0,
     Running,
     Failed,
+    Stopping,
 }
 
 export class App extends React.Component<{}, AppState> {
@@ -24,6 +26,7 @@ export class App extends React.Component<{}, AppState> {
         stderr: "",
         log: "",
         processState: ProcessState.Stopped,
+        restarting: false,
     }
 
     process: ChildProcess | null = null;
@@ -64,34 +67,52 @@ export class App extends React.Component<{}, AppState> {
         this.process.on('close', (code) => {
             console.log(`child process exited with code ${code}`);
 
-            this.setState({
-                processState: ProcessState.Stopped,
-            });
+            if (this.state.restarting) {
+                this.startScript();
+            } else {
+                this.setState({
+                    processState: ProcessState.Stopped,
+                });
+            }
         });
     }
 
-    stopScript() {
+    stopScript(restart: boolean = false) {
         if (this.process != null) {
+            this.setState({
+                processState: ProcessState.Stopping,
+                restarting: restart,
+            });
             this.process.kill();
             this.process = null;
         }
     }
 
     restartScript() {
-        this.stopScript();
-        this.startScript();
+        this.stopScript(true);
     }
 
     render() {
+        const actionButtons = (processState: ProcessState) => {
+            switch (processState) {
+                case ProcessState.Stopped:
+                case ProcessState.Failed:
+                    return <button type="button" onClick={this.startScript}>開始</button>;
+                case ProcessState.Running:
+                return <span>
+                <button type="button" onClick={e => this.stopScript()}>停止</button>
+                <button type="button" onClick={this.restartScript}>再起動</button>
+            </span>;
+            default:
+            return null;
+            }
+        };
+
         return (
             <div className="App">
                 <p>Hello, Electron World!</p>
                 <code>{this.state.command}</code>
-                <div>
-                {this.state.processState === ProcessState.Running ?
-                    <button type="button" onClick={this.stopScript}>停止</button> :
-                    <button type="button" onClick={this.startScript}>開始</button>}
-                </div>
+                <div>{actionButtons(this.state.processState)}</div>
                 log
                 <textarea value={this.state.log} />
             </div>
