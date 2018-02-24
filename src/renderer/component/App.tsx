@@ -1,6 +1,6 @@
 import * as React from "react";
 import { exec, ChildProcess } from "child_process";
-import "./App.css"
+import "./App.css";
 
 export interface AppState {
     command: string;
@@ -15,19 +15,18 @@ export enum ProcessState {
     Stopped = 0,
     Running,
     Failed,
-    Stopping,
+    Stopping
 }
 
 export class App extends React.Component<{}, AppState> {
-
     state = {
         command: `while true; do date; sleep 1s; done`,
         stdout: "",
         stderr: "",
         log: "",
         processState: ProcessState.Stopped,
-        restarting: false,
-    }
+        restarting: false
+    };
 
     process: ChildProcess | null = null;
 
@@ -43,35 +42,35 @@ export class App extends React.Component<{}, AppState> {
             stdout: "",
             stderr: "",
             log: "",
-            processState: ProcessState.Running,
+            processState: ProcessState.Running
         });
 
         this.process = exec(this.state.command);
 
-        this.process.stdout.on('data', (data) => {
+        this.process.stdout.on("data", data => {
             console.log(`stdout: ${data}`);
             this.setState({
                 stdout: this.state.stdout + data,
-                log: this.state.log + data,
+                log: this.state.log + data
             });
         });
 
-        this.process.stderr.on('data', (data) => {
+        this.process.stderr.on("data", data => {
             console.log(`stderr: ${data}`);
             this.setState({
                 stderr: this.state.stderr + data,
-                log: this.state.log + data,
+                log: this.state.log + data
             });
         });
 
-        this.process.on('close', (code) => {
+        this.process.on("close", code => {
             console.log(`child process exited with code ${code}`);
 
             if (this.state.restarting) {
                 this.startScript();
             } else {
                 this.setState({
-                    processState: ProcessState.Stopped,
+                    processState: ProcessState.Stopped
                 });
             }
         });
@@ -81,7 +80,7 @@ export class App extends React.Component<{}, AppState> {
         if (this.process != null) {
             this.setState({
                 processState: ProcessState.Stopping,
-                restarting: restart,
+                restarting: restart
             });
             this.process.kill();
             this.process = null;
@@ -97,14 +96,27 @@ export class App extends React.Component<{}, AppState> {
             switch (processState) {
                 case ProcessState.Stopped:
                 case ProcessState.Failed:
-                    return <button type="button" onClick={this.startScript}>開始</button>;
+                    return (
+                        <button type="button" onClick={this.startScript}>
+                            開始
+                        </button>
+                    );
                 case ProcessState.Running:
-                return <span>
-                <button type="button" onClick={e => this.stopScript()}>停止</button>
-                <button type="button" onClick={this.restartScript}>再起動</button>
-            </span>;
-            default:
-            return null;
+                    return (
+                        <span>
+                            <button
+                                type="button"
+                                onClick={e => this.stopScript()}
+                            >
+                                停止
+                            </button>
+                            <button type="button" onClick={this.restartScript}>
+                                再起動
+                            </button>
+                        </span>
+                    );
+                default:
+                    return null;
             }
         };
 
@@ -116,6 +128,6 @@ export class App extends React.Component<{}, AppState> {
                 log
                 <textarea value={this.state.log} />
             </div>
-        )
+        );
     }
 }
