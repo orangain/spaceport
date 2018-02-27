@@ -19,15 +19,28 @@ export class App extends React.Component<{}, AppState> {
                 name: "terminarun",
                 directory: "~/terminarun",
                 command: `while true; do date; sleep 1s; done`
+            } as Launcher,
+            {
+                key: 1,
+                name: "terminarun2",
+                directory: "~/terminarun",
+                command: `while true; do date; sleep 2s; done`
             } as Launcher
         ],
         activeLauncherIndex: 0,
-        launcherProcesses: new Map<number, LauncherProcess>().set(0, {
-            stdout: "",
-            stderr: "",
-            log: "",
-            processState: ProcessState.Stopped
-        } as LauncherProcess)
+        launcherProcesses: new Map<number, LauncherProcess>()
+            .set(0, {
+                stdout: "",
+                stderr: "",
+                log: "",
+                processState: ProcessState.Stopped
+            } as LauncherProcess)
+            .set(1, {
+                stdout: "",
+                stderr: "",
+                log: "",
+                processState: ProcessState.Stopped
+            } as LauncherProcess)
     };
 
     processes = new Map<number, ChildProcess>();
