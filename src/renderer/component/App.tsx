@@ -1,132 +1,165 @@
 import * as React from "react";
 import { exec, ChildProcess } from "child_process";
+import { Launcher, LauncherProcess, ProcessState } from "../models";
 import "./App.css";
+import { LauncherList } from "./LauncherList";
+import { LauncherDetail } from "./LauncherDetail";
 
 export interface AppState {
-    command: string;
-    stdout: string;
-    stderr: string;
-    log: string;
-    processState: ProcessState;
-    restarting: boolean;
-}
-
-export enum ProcessState {
-    Stopped = 0,
-    Running,
-    Failed,
-    Stopping
+    launchers: Launcher[];
+    activeLauncherIndex: number;
+    launcherProcesses: Map<number, LauncherProcess>;
 }
 
 export class App extends React.Component<{}, AppState> {
     state = {
-        command: `while true; do date; sleep 1s; done`,
-        stdout: "",
-        stderr: "",
-        log: "",
-        processState: ProcessState.Stopped,
-        restarting: false
+        launchers: [
+            {
+                key: 0,
+                name: "terminarun",
+                directory: "~/terminarun",
+                command: `while true; do date; sleep 1s; done`
+            } as Launcher
+        ],
+        activeLauncherIndex: 0,
+        launcherProcesses: new Map<number, LauncherProcess>().set(0, {
+            stdout: "",
+            stderr: "",
+            log: "",
+            processState: ProcessState.Stopped
+        } as LauncherProcess)
     };
 
-    process: ChildProcess | null = null;
+    processes = new Map<number, ChildProcess>();
 
     constructor(props: {}, context?: any) {
         super(props, context);
         this.startScript = this.startScript.bind(this);
         this.stopScript = this.stopScript.bind(this);
         this.restartScript = this.restartScript.bind(this);
+        this.activate = this.activate.bind(this);
     }
 
-    startScript() {
+    updateLauncherProcess(launcher: Launcher, newProcess: LauncherProcess) {
         this.setState({
-            stdout: "",
-            stderr: "",
-            log: "",
-            processState: ProcessState.Running
+            launcherProcesses: new Map<number, LauncherProcess>(
+                this.state.launcherProcesses
+            ).set(launcher.key, newProcess)
         });
+    }
 
-        this.process = exec(this.state.command);
+    activeLauncherProcess(launcher: Launcher) {
+        return this.state.launcherProcesses.get(
+            launcher.key
+        ) as LauncherProcess;
+    }
+    startScript(launcher: Launcher) {
+        const launcherProcess = this.activeLauncherProcess(launcher);
 
-        this.process.stdout.on("data", data => {
+        this.updateLauncherProcess(
+            launcher,
+            Object.assign({}, launcherProcess, {
+                stdout: "",
+                stderr: "",
+                log: "",
+                processState: ProcessState.Running
+            } as LauncherProcess)
+        );
+
+        const process = exec(launcher.command);
+        this.processes.set(launcher.key, process);
+
+        process.stdout.on("data", data => {
             console.log(`stdout: ${data}`);
-            this.setState({
-                stdout: this.state.stdout + data,
-                log: this.state.log + data
-            });
+            const launcherProcess = this.activeLauncherProcess(launcher);
+            this.updateLauncherProcess(
+                launcher,
+                Object.assign({}, launcherProcess, {
+                    stdout: launcherProcess.stdout + data,
+                    log: launcherProcess.log + data
+                })
+            );
         });
 
-        this.process.stderr.on("data", data => {
+        process.stderr.on("data", data => {
             console.log(`stderr: ${data}`);
-            this.setState({
-                stderr: this.state.stderr + data,
-                log: this.state.log + data
-            });
+            const launcherProcess = this.activeLauncherProcess(launcher);
+            this.updateLauncherProcess(
+                launcher,
+                Object.assign({}, launcherProcess, {
+                    stderr: launcherProcess.stderr + data,
+                    log: launcherProcess.log + data
+                })
+            );
         });
 
-        this.process.on("close", code => {
+        process.on("close", code => {
             console.log(`child process exited with code ${code}`);
+            const launcherProcess = this.activeLauncherProcess(launcher);
 
-            if (this.state.restarting) {
-                this.startScript();
+            if (launcherProcess.restarting) {
+                this.startScript(launcher);
             } else {
-                this.setState({
-                    processState: ProcessState.Stopped
-                });
+                this.updateLauncherProcess(
+                    launcher,
+                    Object.assign({}, launcherProcess, {
+                        processState: ProcessState.Stopped
+                    })
+                );
             }
         });
     }
 
-    stopScript(restart: boolean = false) {
-        if (this.process != null) {
-            this.setState({
-                processState: ProcessState.Stopping,
-                restarting: restart
-            });
-            this.process.kill();
-            this.process = null;
+    stopScript(launcher: Launcher, restart: boolean = false) {
+        const process = this.processes.get(launcher.key);
+        if (process != null) {
+            const launcherProcess = this.state.launcherProcesses.get(
+                launcher.key
+            ) as LauncherProcess;
+
+            this.updateLauncherProcess(
+                launcher,
+                Object.assign({}, launcherProcess, {
+                    processState: ProcessState.Stopping,
+                    restarting: restart
+                })
+            );
+            process.kill();
+            this.processes.delete(launcher.key);
         }
     }
 
-    restartScript() {
-        this.stopScript(true);
+    restartScript(launcher: Launcher) {
+        this.stopScript(launcher, true);
+    }
+
+    activate(index: number) {
+        this.setState({
+            activeLauncherIndex: index
+        });
     }
 
     render() {
-        const actionButtons = (processState: ProcessState) => {
-            switch (processState) {
-                case ProcessState.Stopped:
-                case ProcessState.Failed:
-                    return (
-                        <button type="button" onClick={this.startScript}>
-                            開始
-                        </button>
-                    );
-                case ProcessState.Running:
-                    return (
-                        <span>
-                            <button
-                                type="button"
-                                onClick={e => this.stopScript()}
-                            >
-                                停止
-                            </button>
-                            <button type="button" onClick={this.restartScript}>
-                                再起動
-                            </button>
-                        </span>
-                    );
-                default:
-                    return null;
-            }
-        };
-
+        const activeLauncher = this.state.launchers[
+            this.state.activeLauncherIndex
+        ];
         return (
             <div className="App">
-                <p>Hello, Electron World!</p>
-                <code>{this.state.command}</code>
-                <div>{actionButtons(this.state.processState)}</div>
-                log
-                <textarea value={this.state.log} />
+                <LauncherList
+                    launchers={this.state.launchers}
+                    activate={this.activate}
+                />
+                <LauncherDetail
+                    launcher={activeLauncher}
+                    launcherProcess={
+                        this.state.launcherProcesses.get(
+                            activeLauncher.key
+                        ) as LauncherProcess
+                    }
+                    startScript={this.startScript}
+                    stopScript={this.stopScript}
+                    restartScript={this.restartScript}
+                />
             </div>
         );
     }
