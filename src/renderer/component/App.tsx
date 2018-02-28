@@ -78,7 +78,7 @@ export class App extends React.Component<{}, AppState> {
             } as LauncherProcess)
         );
 
-        const process = exec(launcher.command);
+        const process = exec(`cd ${launcher.directory} && ${launcher.command}`);
         this.processes.set(launcher.key, process);
 
         process.stdout.on("data", data => {
