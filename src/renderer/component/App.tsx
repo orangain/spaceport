@@ -155,6 +155,13 @@ export class App extends React.Component<{}, AppState> {
         const activeLauncher = this.state.launchers[
             this.state.activeLauncherIndex
         ];
+        const activeLauncherProcess =
+            activeLauncher === undefined
+                ? undefined
+                : (this.state.launcherProcesses.get(
+                      activeLauncher.key
+                  ) as LauncherProcess);
+
         return (
             <div className="app">
                 <LauncherList
@@ -165,11 +172,7 @@ export class App extends React.Component<{}, AppState> {
                 />
                 <LauncherDetail
                     launcher={activeLauncher}
-                    launcherProcess={
-                        this.state.launcherProcesses.get(
-                            activeLauncher.key
-                        ) as LauncherProcess
-                    }
+                    launcherProcess={activeLauncherProcess}
                     startScript={this.startScript}
                     stopScript={this.stopScript}
                     restartScript={this.restartScript}
