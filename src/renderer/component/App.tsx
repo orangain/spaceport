@@ -29,24 +29,23 @@ export class App extends React.Component<{}, AppState> {
         ],
         activeLauncherIndex: 0,
         launcherProcesses: new Map<number, LauncherProcess>()
-            .set(0, {
-                stdout: "",
-                stderr: "",
-                log: "",
-                processState: ProcessState.Stopped
-            } as LauncherProcess)
-            .set(1, {
-                stdout: "",
-                stderr: "",
-                log: "",
-                processState: ProcessState.Stopped
-            } as LauncherProcess)
     };
 
     processes = new Map<number, ChildProcess>();
 
     constructor(props: {}, context?: any) {
         super(props, context);
+
+        // Fill initial value of launcherProcesses
+        this.state.launchers.forEach(launcher => {
+            this.state.launcherProcesses.set(launcher.key, {
+                stdout: "",
+                stderr: "",
+                log: "",
+                processState: ProcessState.Stopped
+            } as LauncherProcess);
+        });
+
         this.startScript = this.startScript.bind(this);
         this.stopScript = this.stopScript.bind(this);
         this.restartScript = this.restartScript.bind(this);
