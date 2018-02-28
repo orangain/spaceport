@@ -1,7 +1,7 @@
 import * as React from "react";
 import { exec, ChildProcess } from "child_process";
 import { Launcher, LauncherProcess, ProcessState } from "../models";
-import "./App.css";
+import "./App.scss";
 import { LauncherList } from "./LauncherList";
 import { LauncherDetail } from "./LauncherDetail";
 
