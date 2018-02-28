@@ -2,6 +2,8 @@ import * as React from "react";
 
 import { Launcher, LauncherProcess, ProcessState } from "../models";
 
+import "./LauncherDetail.scss";
+
 export interface LauncherDetailProps {
     launcher?: Launcher;
     launcherProcess?: LauncherProcess;
