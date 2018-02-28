@@ -1,4 +1,7 @@
 import * as React from "react";
+import * as fs from "fs";
+import * as path from "path";
+import { remote } from "electron";
 import { exec, ChildProcess } from "child_process";
 import { Launcher, LauncherProcess, ProcessState } from "../models";
 import { LauncherList } from "./LauncherList";
@@ -13,20 +16,7 @@ export interface AppState {
 
 export class App extends React.Component<{}, AppState> {
     state = {
-        launchers: [
-            {
-                key: 0,
-                name: "terminarun",
-                directory: "~/terminarun",
-                command: `while true; do date; sleep 1s; done`
-            } as Launcher,
-            {
-                key: 1,
-                name: "terminarun2",
-                directory: "~/terminarun",
-                command: `while true; do date; sleep 2s; done`
-            } as Launcher
-        ],
+        launchers: [] as Launcher[],
         activeLauncherIndex: 0,
         launcherProcesses: new Map<number, LauncherProcess>()
     };
@@ -36,20 +26,12 @@ export class App extends React.Component<{}, AppState> {
     constructor(props: {}, context?: any) {
         super(props, context);
 
-        // Fill initial value of launcherProcesses
-        this.state.launchers.forEach(launcher => {
-            this.state.launcherProcesses.set(launcher.key, {
-                stdout: "",
-                stderr: "",
-                log: "",
-                processState: ProcessState.Stopped
-            } as LauncherProcess);
-        });
-
         this.startScript = this.startScript.bind(this);
         this.stopScript = this.stopScript.bind(this);
         this.restartScript = this.restartScript.bind(this);
         this.activate = this.activate.bind(this);
+
+        this.loadLaunchers();
     }
 
     updateLauncherProcess(launcher: Launcher, newProcess: LauncherProcess) {
@@ -149,6 +131,36 @@ export class App extends React.Component<{}, AppState> {
         this.setState({
             activeLauncherIndex: index
         });
+    }
+
+    getLaunchersPath() {
+        return path.join(remote.app.getPath("userData"), "launchers.json");
+    }
+
+    saveLaunchers() {
+        const launchersPath = this.getLaunchersPath();
+        console.log(launchersPath);
+        fs.writeFileSync(launchersPath, JSON.stringify(this.state.launchers));
+    }
+
+    loadLaunchers() {
+        const launchersPath = this.getLaunchersPath();
+        console.log(launchersPath);
+        if (fs.existsSync(launchersPath)) {
+            this.state.launchers = JSON.parse(
+                fs.readFileSync(launchersPath, "utf-8")
+            );
+
+            // Fill initial value of launcherProcesses
+            this.state.launchers.forEach(launcher => {
+                this.state.launcherProcesses.set(launcher.key, {
+                    stdout: "",
+                    stderr: "",
+                    log: "",
+                    processState: ProcessState.Stopped
+                } as LauncherProcess);
+            });
+        }
     }
 
     render() {
