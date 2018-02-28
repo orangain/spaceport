@@ -1,3 +1,27 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    height: 100%;
+    font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo,
+        メイリオ, Osaka, "MS PGothic", arial, helvetica, sans-serif;
+}
+
+body {
+    margin: 0;
+    height: 100%;
+}
+
+#app {
+    height: 100%;
+}
+
+.app {
+    display: flex;
+    height: 100%;
+}
+
 textarea {
     width: 100%;
     height: 300px;

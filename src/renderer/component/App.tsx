@@ -1,9 +1,9 @@
 import * as React from "react";
 import { exec, ChildProcess } from "child_process";
 import { Launcher, LauncherProcess, ProcessState } from "../models";
-import "./App.scss";
 import { LauncherList } from "./LauncherList";
 import { LauncherDetail } from "./LauncherDetail";
+import "./App.scss";
 
 export interface AppState {
     launchers: Launcher[];
@@ -157,9 +157,11 @@ export class App extends React.Component<{}, AppState> {
             this.state.activeLauncherIndex
         ];
         return (
-            <div className="App">
+            <div className="app">
                 <LauncherList
                     launchers={this.state.launchers}
+                    activeLauncherIndex={this.state.activeLauncherIndex}
+                    launcherProcesses={this.state.launcherProcesses}
                     activate={this.activate}
                 />
                 <LauncherDetail

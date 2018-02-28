@@ -1,0 +1,45 @@
+.launcher-list {
+    width: 200px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-right: 1px solid gray;
+
+    li {
+        padding: 5px 5px;
+        border-bottom: 1px solid gray;
+        cursor: pointer;
+
+        &.active {
+            background: #ddd;
+        }
+        &:hover {
+            background: #eee;
+        }
+    }
+}
+
+h2 {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.signal {
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 80%;
+}
+
+.running {
+    color: green;
+}
+
+.stopped {
+    color: gray;
+}
+
+small {
+    color: gray;
+    font-size: 12px;
+}
