@@ -20,8 +20,12 @@ body {
     display: flex;
     height: 100%;
 
-    div:first-child {
+    .sidebar {
         border-right: 1px solid gray;
+    }
+
+    .main {
+        flex-grow: 1;
     }
 }
 

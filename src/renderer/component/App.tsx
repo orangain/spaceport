@@ -218,7 +218,7 @@ export class App extends React.Component<{}, AppState> {
 
         return (
             <div className="app">
-                <div>
+                <div className="sidebar">
                     <LauncherList
                         launchers={this.state.launchers}
                         activeLauncherIndex={this.state.activeLauncherIndex}
@@ -226,7 +226,7 @@ export class App extends React.Component<{}, AppState> {
                     />
                     <button onClick={this.addLauncher}>Add</button>
                 </div>
-                <div>{
+                <div className="main">{
                     activeLauncher === null ?
                         <div className="launcher-detail">
                             <p>コマンドを追加してください。</p>
