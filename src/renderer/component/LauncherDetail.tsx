@@ -5,7 +5,7 @@ import { Launcher, ProcessState, LauncherConfig } from "../models";
 import "./LauncherDetail.scss";
 
 export interface LauncherDetailProps {
-    launcher?: Launcher;
+    launcher: Launcher;
     startScript: (launcher: Launcher) => any;
     stopScript: (launcher: Launcher, restart?: boolean) => any;
     restartScript: (launcher: Launcher) => any;
@@ -40,7 +40,7 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
     beginEditName() {
         this.setState(Object.assign({}, this.state, {
             isNameEditing: true,
-            unsavedName: (this.props.launcher as Launcher).config.name,
+            unsavedName: this.props.launcher.config.name,
         }));
     }
 
@@ -55,7 +55,7 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
             isNameEditing: false,
         }));
 
-        const launcher = this.props.launcher as Launcher;
+        const launcher = this.props.launcher;
         this.props.updateLauncherConfig(launcher, Object.assign({}, launcher.config, {
             name: this.state.unsavedName
         }));
@@ -64,7 +64,7 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
     beginEditCommand() {
         this.setState(Object.assign({}, this.state, {
             isCommandEditing: true,
-            unsavedCommand: (this.props.launcher as Launcher).config.command,
+            unsavedCommand: this.props.launcher.config.command,
         }));
     }
 
@@ -79,7 +79,7 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
             isCommandEditing: false,
         }));
 
-        const launcher = this.props.launcher as Launcher;
+        const launcher = this.props.launcher;
         this.props.updateLauncherConfig(launcher, Object.assign({}, launcher.config, {
             command: this.state.unsavedCommand
         }));
@@ -87,14 +87,13 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
 
     render() {
         const actionButtons = (processState: ProcessState) => {
-            const launcher = this.props.launcher as Launcher;
             switch (processState) {
                 case ProcessState.Stopped:
                 case ProcessState.Failed:
                     return (
                         <button
                             type="button"
-                            onClick={e => this.props.startScript(launcher)}
+                            onClick={e => this.props.startScript(this.props.launcher)}
                         >
                             開始
                         </button>
@@ -104,15 +103,13 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
                         <span>
                             <button
                                 type="button"
-                                onClick={e => this.props.stopScript(launcher)}
+                                onClick={e => this.props.stopScript(this.props.launcher)}
                             >
                                 停止
                             </button>
                             <button
                                 type="button"
-                                onClick={e =>
-                                    this.props.restartScript(launcher)
-                                }
+                                onClick={e => this.props.restartScript(this.props.launcher)}
                             >
                                 再起動
                             </button>
@@ -122,14 +119,6 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
                     return null;
             }
         };
-
-        if (this.props.launcher === undefined) {
-            return (
-                <div className="launcher-detail">
-                    <p>コマンドを追加してください。</p>
-                </div>
-            );
-        }
 
         return (
             <div className="launcher-detail">

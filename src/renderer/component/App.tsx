@@ -226,13 +226,19 @@ export class App extends React.Component<{}, AppState> {
                     />
                     <button onClick={this.addLauncher}>Add</button>
                 </div>
-                <LauncherDetail
-                    launcher={activeLauncher}
-                    startScript={this.startScript}
-                    stopScript={this.stopScript}
-                    restartScript={this.restartScript}
-                    updateLauncherConfig={this.updateLauncherConfig}
-                />
+                <div>{
+                    activeLauncher === null ?
+                        <div className="launcher-detail">
+                            <p>コマンドを追加してください。</p>
+                        </div> :
+                        <LauncherDetail
+                            launcher={activeLauncher}
+                            startScript={this.startScript}
+                            stopScript={this.stopScript}
+                            restartScript={this.restartScript}
+                            updateLauncherConfig={this.updateLauncherConfig}
+                        />}
+                </div>
             </div>
         );
     }
