@@ -29,6 +29,7 @@ export class App extends React.Component<{}, AppState> {
         this.restartScript = this.restartScript.bind(this);
         this.activate = this.activate.bind(this);
         this.updateLauncherConfig = this.updateLauncherConfig.bind(this);
+        this.addLauncher = this.addLauncher.bind(this);
 
         this.loadLaunchers();
     }
@@ -147,6 +148,22 @@ export class App extends React.Component<{}, AppState> {
         });
     }
 
+    addLauncher() {
+        const newIndex = this.state.launchers.length;
+        this.setState({
+            launchers: [...this.state.launchers, {
+                key: newIndex,
+                config: {
+                    name: '',
+                    directory: '',
+                    command: '',
+                } as LauncherConfig,
+                process: {} as LauncherProcess
+            }],
+            activeLauncherIndex: newIndex,
+        });
+    }
+
     getLauncherConfigsPath() {
         return path.join(remote.app.getPath("userData"), "launchers.json");
     }
@@ -201,11 +218,14 @@ export class App extends React.Component<{}, AppState> {
 
         return (
             <div className="app">
-                <LauncherList
-                    launchers={this.state.launchers}
-                    activeLauncherIndex={this.state.activeLauncherIndex}
-                    activate={this.activate}
-                />
+                <div>
+                    <LauncherList
+                        launchers={this.state.launchers}
+                        activeLauncherIndex={this.state.activeLauncherIndex}
+                        activate={this.activate}
+                    />
+                    <button onClick={this.addLauncher}>Add</button>
+                </div>
                 <LauncherDetail
                     launcher={activeLauncher}
                     startScript={this.startScript}
