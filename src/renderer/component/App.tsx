@@ -154,6 +154,18 @@ export class App extends React.Component<{}, AppState> {
         const launcherConfigsPath = this.getLauncherConfigsPath();
         console.log(launcherConfigsPath);
         let launcherConfigs = [] as LauncherConfig[];
+        launcherConfigs = [
+            {
+                name: "sample",
+                directory: "~/terminarun",
+                command: "while true; do echo `date`; sleep 1; done"
+            },
+            {
+                name: "sample2",
+                directory: "~/terminarun",
+                command: "while true; do echo `date`; sleep 1; done"
+            }
+        ];
         if (fs.existsSync(launcherConfigsPath)) {
             launcherConfigs = JSON.parse(
                 fs.readFileSync(launcherConfigsPath, "utf-8")
