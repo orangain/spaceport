@@ -15,12 +15,16 @@ export interface LauncherDetailProps {
 export interface LauncherDetailState {
     isNameEditing: boolean;
     unsavedName: string;
+    isCommandEditing: boolean;
+    unsavedCommand: string;
 }
 
 export class LauncherDetail extends React.Component<LauncherDetailProps, LauncherDetailState> {
     state = {
         isNameEditing: false,
-        unsavedName: ''
+        unsavedName: '',
+        isCommandEditing: false,
+        unsavedCommand: ''
     }
 
     constructor(props: LauncherDetailProps, context?: any) {
@@ -28,6 +32,9 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
         this.beginEditName = this.beginEditName.bind(this);
         this.handleNameChange = this.handleNameChange.bind(this);
         this.endEditName = this.endEditName.bind(this);
+        this.beginEditCommand = this.beginEditCommand.bind(this);
+        this.handleCommandChange = this.handleCommandChange.bind(this);
+        this.endEditCommand = this.endEditCommand.bind(this);
     }
 
     beginEditName() {
@@ -51,6 +58,30 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
         const launcher = this.props.launcher as Launcher;
         this.props.updateLauncherConfig(launcher, Object.assign({}, launcher.config, {
             name: this.state.unsavedName
+        }));
+    }
+
+    beginEditCommand() {
+        this.setState(Object.assign({}, this.state, {
+            isCommandEditing: true,
+            unsavedCommand: (this.props.launcher as Launcher).config.command,
+        }));
+    }
+
+    handleCommandChange(e: any) {
+        this.setState(Object.assign({}, this.state, {
+            unsavedCommand: e.target.value
+        }));
+    }
+
+    endEditCommand() {
+        this.setState(Object.assign({}, this.state, {
+            isCommandEditing: false,
+        }));
+
+        const launcher = this.props.launcher as Launcher;
+        this.props.updateLauncherConfig(launcher, Object.assign({}, launcher.config, {
+            command: this.state.unsavedCommand
         }));
     }
 
@@ -107,7 +138,10 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
                     <div>{this.props.launcher.config.name} <button onClick={this.beginEditName}>Edit</button></div>}
                 </h3>
                 <div>{this.props.launcher.config.directory}</div>
-                <code>{this.props.launcher.config.command}</code>
+                <div>{this.state.isCommandEditing ?
+                    <form onSubmit={(e) => { e.preventDefault(); this.endEditCommand(); }}><input autoFocus value={this.state.unsavedCommand} onChange={this.handleCommandChange} /> <button>OK</button></form> :
+                    <div><code>{this.props.launcher.config.command}</code><button onClick={this.beginEditCommand}>Edit</button></div>}
+                </div>
                 <div>{actionButtons(this.props.launcher.process.processState)}</div>
                 log
                 <textarea value={this.props.launcher.process.log} />
