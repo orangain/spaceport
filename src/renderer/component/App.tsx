@@ -28,6 +28,7 @@ export class App extends React.Component<{}, AppState> {
         this.stopScript = this.stopScript.bind(this);
         this.restartScript = this.restartScript.bind(this);
         this.activate = this.activate.bind(this);
+        this.updateLauncherConfig = this.updateLauncherConfig.bind(this);
 
         this.loadLaunchers();
     }
@@ -54,6 +55,12 @@ export class App extends React.Component<{}, AppState> {
     updateLauncherProcess(launcher: Launcher, newProcess: LauncherProcess) {
         this.updateLauncher(Object.assign({}, launcher, {
             process: newProcess
+        }));
+    }
+
+    updateLauncherConfig(launcher: Launcher, newConfig: LauncherConfig) {
+        this.updateLauncher(Object.assign({}, launcher, {
+            config: newConfig
         }));
     }
 
@@ -204,6 +211,7 @@ export class App extends React.Component<{}, AppState> {
                     startScript={this.startScript}
                     stopScript={this.stopScript}
                     restartScript={this.restartScript}
+                    updateLauncherConfig={this.updateLauncherConfig}
                 />
             </div>
         );
