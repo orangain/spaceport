@@ -7,6 +7,11 @@ export enum ProcessState {
 
 export interface Launcher {
     key: number; // Unique key for react component
+    config: LauncherConfig;
+    process: LauncherProcess;
+}
+
+export interface LauncherConfig {
     name: string;
     directory: string;
     command: string;

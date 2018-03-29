@@ -1,12 +1,11 @@
 import * as React from "react";
 
-import { Launcher, LauncherProcess, ProcessState } from "../models";
+import { Launcher, ProcessState } from "../models";
 
 import "./LauncherDetail.scss";
 
 export interface LauncherDetailProps {
     launcher?: Launcher;
-    launcherProcess?: LauncherProcess;
     startScript: (launcher: Launcher) => any;
     stopScript: (launcher: Launcher, restart?: boolean) => any;
     restartScript: (launcher: Launcher) => any;
@@ -58,16 +57,15 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, {}> {
                 </div>
             );
         }
-        const launcherProcess = this.props.launcherProcess as LauncherProcess;
 
         return (
             <div className="launcher-detail">
-                <h3>{this.props.launcher.name}</h3>
-                <div>{this.props.launcher.directory}</div>
-                <code>{this.props.launcher.command}</code>
-                <div>{actionButtons(launcherProcess.processState)}</div>
+                <h3>{this.props.launcher.config.name}</h3>
+                <div>{this.props.launcher.config.directory}</div>
+                <code>{this.props.launcher.config.command}</code>
+                <div>{actionButtons(this.props.launcher.process.processState)}</div>
                 log
-                <textarea value={launcherProcess.log} />
+                <textarea value={this.props.launcher.process.log} />
             </div>
         );
     }

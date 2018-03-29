@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { remote } from "electron";
 import { exec, ChildProcess } from "child_process";
-import { Launcher, LauncherProcess, ProcessState } from "../models";
+import { Launcher, LauncherProcess, ProcessState, LauncherConfig } from "../models";
 import { LauncherList } from "./LauncherList";
 import { LauncherDetail } from "./LauncherDetail";
 import "./App.scss";
@@ -11,14 +11,12 @@ import "./App.scss";
 export interface AppState {
     launchers: Launcher[];
     activeLauncherIndex: number;
-    launcherProcesses: Map<number, LauncherProcess>;
 }
 
 export class App extends React.Component<{}, AppState> {
     state = {
         launchers: [] as Launcher[],
         activeLauncherIndex: 0,
-        launcherProcesses: new Map<number, LauncherProcess>()
     };
 
     processes = new Map<number, ChildProcess>();
@@ -34,25 +32,36 @@ export class App extends React.Component<{}, AppState> {
         this.loadLaunchers();
     }
 
-    updateLauncherProcess(launcher: Launcher, newProcess: LauncherProcess) {
+    indexOfLauncher(key: number) {
+        return this.state.launchers.findIndex(launcher => launcher.key === key);
+    }
+
+    getLauncherByKey(key: number) {
+        return this.state.launchers[this.indexOfLauncher(key)];
+    }
+
+    updateLauncher(newLauncher: Launcher) {
+        const index = this.indexOfLauncher(newLauncher.key);
         this.setState({
-            launcherProcesses: new Map<number, LauncherProcess>(
-                this.state.launcherProcesses
-            ).set(launcher.key, newProcess)
+            launchers: [
+                ...this.state.launchers.slice(0, index),
+                newLauncher,
+                ...this.state.launchers.slice(index + 1),
+            ]
         });
     }
 
-    activeLauncherProcess(launcher: Launcher) {
-        return this.state.launcherProcesses.get(
-            launcher.key
-        ) as LauncherProcess;
+    updateLauncherProcess(launcher: Launcher, newProcess: LauncherProcess) {
+        this.updateLauncher(Object.assign({}, launcher, {
+            process: newProcess
+        }));
     }
-    startScript(launcher: Launcher) {
-        const launcherProcess = this.activeLauncherProcess(launcher);
 
+    startScript(launcher: Launcher) {
+        const key = launcher.key;
         this.updateLauncherProcess(
             launcher,
-            Object.assign({}, launcherProcess, {
+            Object.assign({}, launcher.process, {
                 stdout: "",
                 stderr: "",
                 log: "",
@@ -60,43 +69,45 @@ export class App extends React.Component<{}, AppState> {
             } as LauncherProcess)
         );
 
-        const process = exec(`cd ${launcher.directory} && ${launcher.command}`);
+        const launcherConfig = launcher.config;
+        const process = exec(`cd ${launcherConfig.directory} && ${launcherConfig.command}`);
         this.processes.set(launcher.key, process);
 
         process.stdout.on("data", data => {
             console.log(`stdout: ${data}`);
-            const launcherProcess = this.activeLauncherProcess(launcher);
+            // launcher object in parent scope may no longer be what you expected
+            const launcher = this.getLauncherByKey(key);
             this.updateLauncherProcess(
                 launcher,
-                Object.assign({}, launcherProcess, {
-                    stdout: launcherProcess.stdout + data,
-                    log: launcherProcess.log + data
+                Object.assign({}, launcher.process, {
+                    stdout: launcher.process.stdout + data,
+                    log: launcher.process.log + data
                 })
             );
         });
 
         process.stderr.on("data", data => {
             console.log(`stderr: ${data}`);
-            const launcherProcess = this.activeLauncherProcess(launcher);
+            const launcher = this.getLauncherByKey(key);
             this.updateLauncherProcess(
                 launcher,
-                Object.assign({}, launcherProcess, {
-                    stderr: launcherProcess.stderr + data,
-                    log: launcherProcess.log + data
+                Object.assign({}, launcher.process, {
+                    stderr: launcher.process.stderr + data,
+                    log: launcher.process.log + data
                 })
             );
         });
 
         process.on("close", code => {
             console.log(`child process exited with code ${code}`);
-            const launcherProcess = this.activeLauncherProcess(launcher);
+            const launcher = this.getLauncherByKey(key);
 
-            if (launcherProcess.restarting) {
+            if (launcher.process.restarting) {
                 this.startScript(launcher);
             } else {
                 this.updateLauncherProcess(
                     launcher,
-                    Object.assign({}, launcherProcess, {
+                    Object.assign({}, launcher.process, {
                         processState: ProcessState.Stopped
                     })
                 );
@@ -107,13 +118,9 @@ export class App extends React.Component<{}, AppState> {
     stopScript(launcher: Launcher, restart: boolean = false) {
         const process = this.processes.get(launcher.key);
         if (process != null) {
-            const launcherProcess = this.state.launcherProcesses.get(
-                launcher.key
-            ) as LauncherProcess;
-
             this.updateLauncherProcess(
                 launcher,
-                Object.assign({}, launcherProcess, {
+                Object.assign({}, launcher.process, {
                     processState: ProcessState.Stopping,
                     restarting: restart
                 })
@@ -133,58 +140,55 @@ export class App extends React.Component<{}, AppState> {
         });
     }
 
-    getLaunchersPath() {
+    getLauncherConfigsPath() {
         return path.join(remote.app.getPath("userData"), "launchers.json");
     }
 
     saveLaunchers() {
-        const launchersPath = this.getLaunchersPath();
-        console.log(launchersPath);
-        fs.writeFileSync(launchersPath, JSON.stringify(this.state.launchers));
+        const launcherConfigsPath = this.getLauncherConfigsPath();
+        console.log(launcherConfigsPath);
+        fs.writeFileSync(launcherConfigsPath, JSON.stringify(this.state.launchers));
     }
 
     loadLaunchers() {
-        const launchersPath = this.getLaunchersPath();
-        console.log(launchersPath);
-        if (fs.existsSync(launchersPath)) {
-            this.state.launchers = JSON.parse(
-                fs.readFileSync(launchersPath, "utf-8")
+        const launcherConfigsPath = this.getLauncherConfigsPath();
+        console.log(launcherConfigsPath);
+        let launcherConfigs = [] as LauncherConfig[];
+        if (fs.existsSync(launcherConfigsPath)) {
+            launcherConfigs = JSON.parse(
+                fs.readFileSync(launcherConfigsPath, "utf-8")
             );
+        }
 
-            // Fill initial value of launcherProcesses
-            this.state.launchers.forEach(launcher => {
-                this.state.launcherProcesses.set(launcher.key, {
+        // Fill initial value of launcherProcesses
+        this.state.launchers = launcherConfigs.map((launcherConfig, i) => {
+            return {
+                key: i,
+                config: launcherConfig,
+                process: {
                     stdout: "",
                     stderr: "",
                     log: "",
                     processState: ProcessState.Stopped
-                } as LauncherProcess);
-            });
-        }
+                } as LauncherProcess
+            } as Launcher;
+        });
     }
 
     render() {
         const activeLauncher = this.state.launchers[
             this.state.activeLauncherIndex
         ];
-        const activeLauncherProcess =
-            activeLauncher === undefined
-                ? undefined
-                : (this.state.launcherProcesses.get(
-                      activeLauncher.key
-                  ) as LauncherProcess);
 
         return (
             <div className="app">
                 <LauncherList
                     launchers={this.state.launchers}
                     activeLauncherIndex={this.state.activeLauncherIndex}
-                    launcherProcesses={this.state.launcherProcesses}
                     activate={this.activate}
                 />
                 <LauncherDetail
                     launcher={activeLauncher}
-                    launcherProcess={activeLauncherProcess}
                     startScript={this.startScript}
                     stopScript={this.stopScript}
                     restartScript={this.restartScript}
