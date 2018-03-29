@@ -6,6 +6,7 @@ import { exec, ChildProcess } from "child_process";
 import { Launcher, LauncherProcess, ProcessState, LauncherConfig } from "../models";
 import { LauncherList } from "./LauncherList";
 import { LauncherDetail } from "./LauncherDetail";
+import "../../../static/photon-0.1.2-dist/css/photon.min.css"
 import "./App.scss";
 
 export interface AppState {
@@ -217,28 +218,36 @@ export class App extends React.Component<{}, AppState> {
         ];
 
         return (
-            <div className="app">
-                <div className="sidebar">
-                    <LauncherList
-                        launchers={this.state.launchers}
-                        activeLauncherIndex={this.state.activeLauncherIndex}
-                        activate={this.activate}
-                    />
-                    <button onClick={this.addLauncher}>Add</button>
+            <div className="window">
+                <div className="window-content">
+                    <div className="pane-group">
+                        <div className="pane-sm sidebar">
+                            <LauncherList
+                                launchers={this.state.launchers}
+                                activeLauncherIndex={this.state.activeLauncherIndex}
+                                activate={this.activate}
+                            />
+                        </div>
+                        <div className="pane">{
+                            activeLauncher === null ?
+                                <div className="launcher-detail">
+                                    <p>コマンドを追加してください。</p>
+                                </div> :
+                                <LauncherDetail
+                                    launcher={activeLauncher}
+                                    startScript={this.startScript}
+                                    stopScript={this.stopScript}
+                                    restartScript={this.restartScript}
+                                    updateLauncherConfig={this.updateLauncherConfig}
+                                />}
+                        </div>
+                    </div>
                 </div>
-                <div className="main">{
-                    activeLauncher === null ?
-                        <div className="launcher-detail">
-                            <p>コマンドを追加してください。</p>
-                        </div> :
-                        <LauncherDetail
-                            launcher={activeLauncher}
-                            startScript={this.startScript}
-                            stopScript={this.stopScript}
-                            restartScript={this.restartScript}
-                            updateLauncherConfig={this.updateLauncherConfig}
-                        />}
-                </div>
+                <footer className="toolbar toolbar-footer">
+                    <div className="toolbar-actions">
+                        <button onClick={this.addLauncher} className="btn btn-default"><span className="icon icon-plus"></span> 追加</button>
+                    </div>
+                </footer>
             </div>
         );
     }

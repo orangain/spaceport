@@ -91,26 +91,26 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
                 case ProcessState.Failed:
                     return (
                         <button
-                            type="button"
+                            type="button" className="btn btn-positive"
                             onClick={e => this.props.startScript(this.props.launcher)}
                         >
-                            開始
+                            <span className="icon icon-play"></span> 開始
                         </button>
                     );
                 case ProcessState.Running:
                     return (
                         <span>
                             <button
-                                type="button"
+                                type="button" className="btn btn-negative"
                                 onClick={e => this.props.stopScript(this.props.launcher)}
                             >
-                                停止
+                                <span className="icon icon-stop"></span> 停止
                             </button>
                             <button
-                                type="button"
+                                type="button" className="btn btn-warning"
                                 onClick={e => this.props.restartScript(this.props.launcher)}
                             >
-                                再起動
+                                <span className="icon icon-cw"></span> 再起動
                             </button>
                         </span>
                     );
@@ -123,15 +123,15 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
             <div className="launcher-detail">
                 {this.state.isEditing ?
                     <form onSubmit={(e) => { e.preventDefault(); this.endEdit(); }}>
-                        <div>
-                            Name
-                            <input autoFocus value={this.state.unsavedName} onChange={this.handleNameChange} />
+                        <div className="form-group">
+                            <label>名前</label>
+                            <input autoFocus className="form-control" value={this.state.unsavedName} onChange={this.handleNameChange} />
                         </div>
-                        <div>
-                            Command
-                            <input value={this.state.unsavedCommand} onChange={this.handleCommandChange} />
+                        <div className="form-group">
+                            <label>コマンド</label>
+                            <textarea className="form-control" value={this.state.unsavedCommand} onChange={this.handleCommandChange} />
                         </div>
-                        <button>OK</button> <button type="button" onClick={this.cancelEdit}>Cancel</button>
+                        <button className="btn btn-primary">保存</button> <button className="btn btn-default" type="button" onClick={this.cancelEdit}>キャンセル</button>
                     </form>
                     :
                     <div>
@@ -139,7 +139,7 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
                         <div>{this.props.launcher.config.directory}</div>
                         <div><code>{this.props.launcher.config.command}</code></div>
 
-                        <button onClick={this.beginEdit}>Edit</button>
+                        <button className="btn btn-default" onClick={this.beginEdit}><span className="icon icon-pencil"></span> 編集</button>
 
                         <div>{actionButtons(this.props.launcher.process.processState)}</div>
                         log
