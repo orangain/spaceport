@@ -15,6 +15,7 @@ export interface LauncherDetailProps {
 export interface LauncherDetailState {
     isEditing: boolean;
     unsavedName: string;
+    unsavedDirectory: string;
     unsavedCommand: string;
 }
 
@@ -22,15 +23,21 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
     state = {
         isEditing: false,
         unsavedName: '',
+        unsavedDirectory: '',
         unsavedCommand: ''
     }
+    directoryInput: HTMLInputElement | null = null;
 
     constructor(props: LauncherDetailProps, context?: any) {
         super(props, context);
         this.beginEdit = this.beginEdit.bind(this);
         this.endEdit = this.endEdit.bind(this);
         this.cancelEdit = this.cancelEdit.bind(this);
+        this.updateDirectoryInput = this.updateDirectoryInput.bind(this);
+        this.openDirectoryDialog = this.openDirectoryDialog.bind(this);
         this.handleNameChange = this.handleNameChange.bind(this);
+        this.handleDirectoryChange = this.handleDirectoryChange.bind(this);
+        this.handleDirectorySelect = this.handleDirectorySelect.bind(this);
         this.handleCommandChange = this.handleCommandChange.bind(this);
     }
 
@@ -41,6 +48,7 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
             this.setState(Object.assign({}, this.state, {
                 isEditing: isNew,
                 unsavedName: nextProps.launcher.config.name,
+                unsavedDirectory: nextProps.launcher.config.directory,
                 unsavedCommand: nextProps.launcher.config.command
             }));
         }
@@ -50,6 +58,7 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
         this.setState(Object.assign({}, this.state, {
             isEditing: true,
             unsavedName: this.props.launcher.config.name,
+            unsavedDirectory: this.props.launcher.config.directory,
             unsavedCommand: this.props.launcher.config.command,
         }));
     }
@@ -62,6 +71,7 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
         const launcher = this.props.launcher;
         this.props.updateLauncherConfig(launcher, Object.assign({}, launcher.config, {
             name: this.state.unsavedName,
+            directory: this.state.unsavedDirectory,
             command: this.state.unsavedCommand
         }));
     }
@@ -72,10 +82,37 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
         }));
     }
 
+    updateDirectoryInput(input: HTMLInputElement | null) {
+        this.directoryInput = input;
+        if (input !== null) {
+            // Set attribute here because setting webkitdirectory attribute in JSX causes TypeScript error.
+            input.webkitdirectory = true;
+        }
+    }
+
+    openDirectoryDialog() {
+        (this.directoryInput as HTMLInputElement).click();
+    }
+
     handleNameChange(e: any) {
         this.setState(Object.assign({}, this.state, {
             unsavedName: e.target.value
         }));
+    }
+
+    handleDirectoryChange(e: any) {
+        this.setState(Object.assign({}, this.state, {
+            unsavedDirectory: e.dataTransfer ? e.dataTransfer.files[0].path : e.target.value
+        }));
+    }
+
+    handleDirectorySelect(e: any) {
+        const files = (this.directoryInput as HTMLInputElement).files;
+        if (files !== null && files.length > 0) {
+            this.setState(Object.assign({}, this.state, {
+                unsavedDirectory: files[0].path
+            }));
+        }
     }
 
     handleCommandChange(e: any) {
@@ -126,6 +163,12 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
                         <div className="form-group">
                             <label>名前</label>
                             <input autoFocus className="form-control" value={this.state.unsavedName} onChange={this.handleNameChange} />
+                        </div>
+                        <div className="form-group">
+                            <label>ディレクトリ</label>
+                            <input className="form-control" value={this.state.unsavedDirectory} onChange={this.handleDirectoryChange} />
+                            <button className="btn btn-default" type="button" onClick={this.openDirectoryDialog} >...</button>
+                            <input style={{ display: "none" }} type="file" ref={this.updateDirectoryInput} onChange={this.handleDirectorySelect} />
                         </div>
                         <div className="form-group">
                             <label>コマンド</label>
