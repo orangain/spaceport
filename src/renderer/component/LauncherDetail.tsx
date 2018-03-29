@@ -109,8 +109,12 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
     handleDirectorySelect(e: any) {
         const files = (this.directoryInput as HTMLInputElement).files;
         if (files !== null && files.length > 0) {
+            let path = files[0].path;
+            if (process.env.HOME && path.startsWith(process.env.HOME)) {
+                path = '~' + path.slice(process.env.HOME.length);
+            }
             this.setState(Object.assign({}, this.state, {
-                unsavedDirectory: files[0].path
+                unsavedDirectory: path
             }));
         }
     }
