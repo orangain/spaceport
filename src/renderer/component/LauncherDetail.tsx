@@ -13,34 +13,62 @@ export interface LauncherDetailProps {
 }
 
 export interface LauncherDetailState {
-    isNameEditing: boolean;
+    isEditing: boolean;
     unsavedName: string;
-    isCommandEditing: boolean;
     unsavedCommand: string;
 }
 
 export class LauncherDetail extends React.Component<LauncherDetailProps, LauncherDetailState> {
     state = {
-        isNameEditing: false,
+        isEditing: false,
         unsavedName: '',
-        isCommandEditing: false,
         unsavedCommand: ''
     }
 
     constructor(props: LauncherDetailProps, context?: any) {
         super(props, context);
-        this.beginEditName = this.beginEditName.bind(this);
+        this.beginEdit = this.beginEdit.bind(this);
+        this.endEdit = this.endEdit.bind(this);
+        this.cancelEdit = this.cancelEdit.bind(this);
         this.handleNameChange = this.handleNameChange.bind(this);
-        this.endEditName = this.endEditName.bind(this);
-        this.beginEditCommand = this.beginEditCommand.bind(this);
         this.handleCommandChange = this.handleCommandChange.bind(this);
-        this.endEditCommand = this.endEditCommand.bind(this);
     }
 
-    beginEditName() {
+    componentWillReceiveProps(nextProps: LauncherDetailProps) {
+        if (nextProps.launcher.key !== this.props.launcher.key) {
+            // Reset edit state
+            const isNew = nextProps.launcher.config.name === '';
+            this.setState(Object.assign({}, this.state, {
+                isEditing: isNew,
+                unsavedName: nextProps.launcher.config.name,
+                unsavedCommand: nextProps.launcher.config.command
+            }));
+        }
+    }
+
+    beginEdit() {
         this.setState(Object.assign({}, this.state, {
-            isNameEditing: true,
+            isEditing: true,
             unsavedName: this.props.launcher.config.name,
+            unsavedCommand: this.props.launcher.config.command,
+        }));
+    }
+
+    endEdit() {
+        this.setState(Object.assign({}, this.state, {
+            isEditing: false,
+        }));
+
+        const launcher = this.props.launcher;
+        this.props.updateLauncherConfig(launcher, Object.assign({}, launcher.config, {
+            name: this.state.unsavedName,
+            command: this.state.unsavedCommand
+        }));
+    }
+
+    cancelEdit() {
+        this.setState(Object.assign({}, this.state, {
+            isEditing: false,
         }));
     }
 
@@ -50,38 +78,9 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
         }));
     }
 
-    endEditName() {
-        this.setState(Object.assign({}, this.state, {
-            isNameEditing: false,
-        }));
-
-        const launcher = this.props.launcher;
-        this.props.updateLauncherConfig(launcher, Object.assign({}, launcher.config, {
-            name: this.state.unsavedName
-        }));
-    }
-
-    beginEditCommand() {
-        this.setState(Object.assign({}, this.state, {
-            isCommandEditing: true,
-            unsavedCommand: this.props.launcher.config.command,
-        }));
-    }
-
     handleCommandChange(e: any) {
         this.setState(Object.assign({}, this.state, {
             unsavedCommand: e.target.value
-        }));
-    }
-
-    endEditCommand() {
-        this.setState(Object.assign({}, this.state, {
-            isCommandEditing: false,
-        }));
-
-        const launcher = this.props.launcher;
-        this.props.updateLauncherConfig(launcher, Object.assign({}, launcher.config, {
-            command: this.state.unsavedCommand
         }));
     }
 
@@ -122,18 +121,30 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
 
         return (
             <div className="launcher-detail">
-                <h3>{this.state.isNameEditing ?
-                    <form onSubmit={(e) => { e.preventDefault(); this.endEditName(); }}><input autoFocus value={this.state.unsavedName} onChange={this.handleNameChange} /> <button>OK</button></form> :
-                    <div>{this.props.launcher.config.name} <button onClick={this.beginEditName}>Edit</button></div>}
-                </h3>
-                <div>{this.props.launcher.config.directory}</div>
-                <div>{this.state.isCommandEditing ?
-                    <form onSubmit={(e) => { e.preventDefault(); this.endEditCommand(); }}><input autoFocus value={this.state.unsavedCommand} onChange={this.handleCommandChange} /> <button>OK</button></form> :
-                    <div><code>{this.props.launcher.config.command}</code><button onClick={this.beginEditCommand}>Edit</button></div>}
-                </div>
-                <div>{actionButtons(this.props.launcher.process.processState)}</div>
-                log
+                {this.state.isEditing ?
+                    <form onSubmit={(e) => { e.preventDefault(); this.endEdit(); }}>
+                        <div>
+                            Name
+                            <input autoFocus value={this.state.unsavedName} onChange={this.handleNameChange} />
+                        </div>
+                        <div>
+                            Command
+                            <input value={this.state.unsavedCommand} onChange={this.handleCommandChange} />
+                        </div>
+                        <button>OK</button> <button type="button" onClick={this.cancelEdit}>Cancel</button>
+                    </form>
+                    :
+                    <div>
+                        <h3>{this.props.launcher.config.name}</h3>
+                        <div>{this.props.launcher.config.directory}</div>
+                        <div><code>{this.props.launcher.config.command}</code></div>
+
+                        <button onClick={this.beginEdit}>Edit</button>
+
+                        <div>{actionButtons(this.props.launcher.process.processState)}</div>
+                        log
                 <textarea value={this.props.launcher.process.log} />
+                    </div>}
             </div>
         );
     }
