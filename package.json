@@ -16,7 +16,7 @@
   "devDependencies": {
     "@types/react": "^16.0.38",
     "@types/react-dom": "^16.0.4",
-    "electron": "1.8.2",
+    "electron": "1.8.4",
     "electron-builder": "^20.0.6",
     "electron-webpack": "^1.13.0",
     "electron-webpack-ts": "^1.4.0",
