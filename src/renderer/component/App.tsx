@@ -37,6 +37,7 @@ export class App extends React.Component<{}, AppState> {
         this.activate = this.activate.bind(this);
         this.updateLauncherConfig = this.updateLauncherConfig.bind(this);
         this.addLauncher = this.addLauncher.bind(this);
+        this.removeLauncher = this.removeLauncher.bind(this);
         this.onUnload = this.onUnload.bind(this);
 
         this.loadLaunchers();
@@ -203,6 +204,16 @@ export class App extends React.Component<{}, AppState> {
         }, () => { this.saveLaunchers(); });
     }
 
+    removeLauncher(index: number) {
+        this.setState({
+            launchers: [
+                ...this.state.launchers.slice(0, index),
+                ...this.state.launchers.slice(index + 1)
+            ],
+            activeLauncherIndex: Math.min(this.state.activeLauncherIndex, this.state.launchers.length - 2)
+        }, () => { this.saveLaunchers() });
+    }
+
     getLauncherConfigsPath() {
         return path.join(remote.app.getPath("userData"), "launchers.json");
     }
@@ -270,10 +281,11 @@ export class App extends React.Component<{}, AppState> {
                                     this.state.activeLauncherIndex
                                 }
                                 activate={this.activate}
+                                removeLauncher={this.removeLauncher}
                             />
                         </div>
                         <div className="pane">
-                            {activeLauncher === null ? (
+                            {activeLauncher === undefined ? (
                                 <div className="launcher-detail">
                                     <p>コマンドを追加してください。</p>
                                 </div>
