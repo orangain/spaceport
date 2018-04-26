@@ -181,16 +181,18 @@ export class LauncherDetail extends React.Component<LauncherDetailProps, Launche
                         <button className="btn btn-primary">保存</button> <button className="btn btn-default" type="button" onClick={this.cancelEdit}>キャンセル</button>
                     </form>
                     :
-                    <div>
-                        <h3>{this.props.launcher.config.name}</h3>
-                        <div>{this.props.launcher.config.directory}</div>
-                        <div><code>{this.props.launcher.config.command}</code></div>
+                    <div className="launcher-detail-container">
+                        <div>
+                            <h3>{this.props.launcher.config.name}</h3>
+                            <div>{this.props.launcher.config.directory}</div>
+                            <div><code>{this.props.launcher.config.command}</code></div>
 
-                        <button className="btn btn-default" onClick={this.beginEdit}><span className="icon icon-pencil"></span> 編集</button>
+                            <button className="btn btn-default" onClick={this.beginEdit}><span className="icon icon-pencil"></span> 編集</button>
 
-                        <div>{actionButtons(this.props.launcher.process.processState)}</div>
-                        log
-                <textarea value={this.props.launcher.process.log} />
+                            <div>{actionButtons(this.props.launcher.process.processState)}</div>
+                            log
+                        </div>
+                        <textarea value={this.props.launcher.process.log} />
                     </div>}
             </div>
         );

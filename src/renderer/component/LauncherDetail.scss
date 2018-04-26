@@ -3,3 +3,18 @@
         color: #fff;
     }
 }
+
+.launcher-detail {
+    height: 100%;
+
+    .launcher-detail-container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+
+        textarea {
+            flex-grow: 1;
+            width: 100%;
+        }
+    }
+}
