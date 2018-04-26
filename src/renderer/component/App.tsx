@@ -65,7 +65,7 @@ export class App extends React.Component<{}, AppState> {
         return this.state.launchers[this.indexOfLauncher(key)];
     }
 
-    updateLauncher(newLauncher: Launcher) {
+    updateLauncher(newLauncher: Launcher, callback?: () => void) {
         const index = this.indexOfLauncher(newLauncher.key);
         this.setState({
             launchers: [
@@ -73,7 +73,7 @@ export class App extends React.Component<{}, AppState> {
                 newLauncher,
                 ...this.state.launchers.slice(index + 1)
             ]
-        });
+        }, callback);
     }
 
     updateLauncherProcess(launcher: Launcher, newProcess: LauncherProcess) {
@@ -88,7 +88,8 @@ export class App extends React.Component<{}, AppState> {
         this.updateLauncher(
             Object.assign({}, launcher, {
                 config: newConfig
-            })
+            }),
+            () => { this.saveLaunchers(); }
         );
     }
 
@@ -199,7 +200,7 @@ export class App extends React.Component<{}, AppState> {
                 }
             ],
             activeLauncherIndex: newIndex
-        });
+        }, () => { this.saveLaunchers(); });
     }
 
     getLauncherConfigsPath() {
@@ -208,10 +209,11 @@ export class App extends React.Component<{}, AppState> {
 
     saveLaunchers() {
         const launcherConfigsPath = this.getLauncherConfigsPath();
+        const launcherConfigs = this.state.launchers.map(launcher => launcher.config);
         console.log(launcherConfigsPath);
         fs.writeFileSync(
             launcherConfigsPath,
-            JSON.stringify(this.state.launchers)
+            JSON.stringify(launcherConfigs)
         );
     }
 
@@ -276,16 +278,16 @@ export class App extends React.Component<{}, AppState> {
                                     <p>コマンドを追加してください。</p>
                                 </div>
                             ) : (
-                                <LauncherDetail
-                                    launcher={activeLauncher}
-                                    startScript={this.startScript}
-                                    stopScript={this.stopScript}
-                                    restartScript={this.restartScript}
-                                    updateLauncherConfig={
-                                        this.updateLauncherConfig
-                                    }
-                                />
-                            )}
+                                    <LauncherDetail
+                                        launcher={activeLauncher}
+                                        startScript={this.startScript}
+                                        stopScript={this.stopScript}
+                                        restartScript={this.restartScript}
+                                        updateLauncherConfig={
+                                            this.updateLauncherConfig
+                                        }
+                                    />
+                                )}
                         </div>
                     </div>
                 </div>
