@@ -259,7 +259,7 @@ export class LauncherDetail extends React.Component<
               </div>
               log
             </div>
-            <textarea value={this.props.launcher.process.log} />
+            <div className="log">{this.props.launcher.process.log}</div>
           </div>
         )}
       </div>
