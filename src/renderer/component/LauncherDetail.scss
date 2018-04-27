@@ -1,20 +1,22 @@
-.btn.btn-positive, .btn.btn-negative, .btn.btn-warning {
-    .icon {
-        color: #fff;
-    }
+.btn.btn-positive,
+.btn.btn-negative,
+.btn.btn-warning {
+  .icon {
+    color: #fff;
+  }
 }
 
 .launcher-detail {
+  height: 100%;
+
+  .launcher-detail-container {
     height: 100%;
+    display: flex;
+    flex-direction: column;
 
-    .launcher-detail-container {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-
-        textarea {
-            flex-grow: 1;
-            width: 100%;
-        }
+    textarea {
+      flex-grow: 1;
+      width: 100%;
     }
+  }
 }
