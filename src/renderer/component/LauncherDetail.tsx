@@ -30,9 +30,13 @@ export class LauncherDetail extends React.Component<
     unsavedCommand: ""
   };
   directoryInput: HTMLInputElement | null = null;
+  logElement: HTMLDivElement | null = null;
+  scrollFromBottom: number | undefined;
 
   constructor(props: LauncherDetailProps, context?: any) {
     super(props, context);
+    this.setLogElementRef = this.setLogElementRef.bind(this);
+    this.scrollLogBottomIfNeeded = this.scrollLogBottomIfNeeded.bind(this);
     this.beginEdit = this.beginEdit.bind(this);
     this.endEdit = this.endEdit.bind(this);
     this.cancelEdit = this.cancelEdit.bind(this);
@@ -57,6 +61,50 @@ export class LauncherDetail extends React.Component<
         })
       );
     }
+  }
+
+  componentWillUpdate(
+    nextProps: Readonly<LauncherDetailProps>,
+    nextState: Readonly<LauncherDetailState>,
+    nextContext: any
+  ) {
+    if (this.logElement === null) {
+      return;
+    }
+
+    this.scrollFromBottom =
+      this.logElement.scrollHeight -
+      this.logElement.scrollTop -
+      this.logElement.clientHeight;
+    // console.log(this.scrollFromBottom);
+  }
+
+  componentDidUpdate(
+    prevProps: Readonly<LauncherDetailProps>,
+    prevState: Readonly<LauncherDetailState>,
+    prevContext: any
+  ) {
+    if (this.props.launcher.process.log === prevProps.launcher.process.log) {
+      return;
+    }
+
+    this.scrollLogBottomIfNeeded();
+  }
+
+  setLogElementRef(element: HTMLDivElement) {
+    this.logElement = element;
+  }
+
+  scrollLogBottomIfNeeded() {
+    if (
+      this.logElement === null ||
+      this.scrollFromBottom === undefined ||
+      this.scrollFromBottom > 10
+    ) {
+      return;
+    }
+
+    this.logElement.scrollTop = this.logElement.scrollHeight;
   }
 
   beginEdit() {
@@ -259,7 +307,9 @@ export class LauncherDetail extends React.Component<
               </div>
               log
             </div>
-            <div className="log">{this.props.launcher.process.log}</div>
+            <div className="log" ref={this.setLogElementRef}>
+              {this.props.launcher.process.log}
+            </div>
           </div>
         )}
       </div>
