@@ -112,9 +112,11 @@ export class App extends React.Component<{}, AppState> {
     );
 
     const launcherConfig = launcher.config;
-    const p = exec(
-      `cd ${launcherConfig.directory} && ${launcherConfig.command}`
+    let directory = launcherConfig.directory.replace(
+      "~",
+      process.env.HOME || "~"
     );
+    const p = exec(launcherConfig.command, { cwd: directory });
     this.processes.set(launcher.key, p);
     console.log(p.pid);
 
