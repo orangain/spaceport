@@ -293,19 +293,29 @@ export class LauncherDetail extends React.Component<
           </form>
         ) : (
           <div className="launcher-detail-container">
-            <div>
-              <h3>{this.props.launcher.config.name}</h3>
-              <div>{this.props.launcher.config.directory}</div>
-              <div>
-                <code>{this.props.launcher.config.command}</code>
+            <div className="metadata">
+              <div className="top">
+                <h3>{this.props.launcher.config.name}</h3>
+                <div>
+                  <button className="btn btn-default" onClick={this.beginEdit}>
+                    <span className="icon icon-pencil" /> 編集
+                  </button>
+                </div>
               </div>
-              <button className="btn btn-default" onClick={this.beginEdit}>
-                <span className="icon icon-pencil" /> 編集
-              </button>
+              <div className="directory">
+                {this.props.launcher.config.directory}
+              </div>
+              <div>
+                <code>
+                  <pre>{this.props.launcher.config.command}</pre>
+                </code>
+              </div>
               <div>
                 {actionButtons(this.props.launcher.process.processState)}
               </div>
-              log
+            </div>
+            <div>
+              <span>Log:</span>
             </div>
             <div className="log" ref={this.setLogElementRef}>
               {this.props.launcher.process.log}
