@@ -1,6 +1,12 @@
 "use strict";
 
-import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from "electron";
+import {
+  app,
+  BrowserWindow,
+  Menu,
+  MenuItemConstructorOptions,
+  shell
+} from "electron";
 import * as path from "path";
 import { format as formatUrl } from "url";
 
@@ -51,6 +57,35 @@ function createMainWindow() {
         { role: "paste" },
         { role: "selectall" }
       ]
+    },
+    {
+      label: "View",
+      submenu: [
+        { role: "reload" },
+        { role: "forcereload" },
+        { role: "toggledevtools" },
+        { type: "separator" },
+        { role: "resetzoom" },
+        { role: "zoomin" },
+        { role: "zoomout" },
+        { type: "separator" },
+        { role: "togglefullscreen" }
+      ]
+    },
+    {
+      role: "window",
+      submenu: [{ role: "minimize" }, { role: "close" }]
+    },
+    {
+      role: "help",
+      submenu: [
+        {
+          label: "Learn More",
+          click() {
+            shell.openExternal("https://electronjs.org");
+          }
+        }
+      ]
     }
   ];
 
@@ -69,6 +104,24 @@ function createMainWindow() {
         { role: "quit" }
       ]
     });
+
+    // Edit menu
+    (template[1].submenu as MenuItemConstructorOptions[]).push(
+      { type: "separator" },
+      {
+        label: "Speech",
+        submenu: [{ role: "startspeaking" }, { role: "stopspeaking" }]
+      }
+    );
+
+    // Window menu
+    template[3].submenu = [
+      { role: "close" },
+      { role: "minimize" },
+      { role: "zoom" },
+      { type: "separator" },
+      { role: "front" }
+    ];
   }
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
