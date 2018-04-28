@@ -255,18 +255,20 @@ export class LauncherDetail extends React.Component<
             </div>
             <div className="form-group">
               <label>ディレクトリ</label>
-              <input
-                className="form-control"
-                value={this.state.unsavedDirectory}
-                onChange={this.handleDirectoryChange}
-              />
-              <button
-                className="btn btn-default"
-                type="button"
-                onClick={this.openDirectoryDialog}
-              >
-                ...
-              </button>
+              <div className="form-row">
+                <input
+                  className="form-control"
+                  value={this.state.unsavedDirectory}
+                  onChange={this.handleDirectoryChange}
+                />
+                <button
+                  className="btn btn-default"
+                  type="button"
+                  onClick={this.openDirectoryDialog}
+                >
+                  ...
+                </button>
+              </div>
               <input
                 style={{ display: "none" }}
                 type="file"

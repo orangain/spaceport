@@ -9,6 +9,18 @@
 .launcher-detail {
   height: 100%;
 
+  form {
+    padding: 10px;
+
+    .form-row {
+      display: flex;
+    }
+
+    textarea {
+      height: 200px;
+    }
+  }
+
   .launcher-detail-container {
     height: 100%;
     display: flex;
