@@ -198,15 +198,14 @@ export class App extends React.Component<{}, AppState> {
       {
         launchers: [
           ...this.state.launchers,
-          {
-            key: newIndex,
-            config: {
+          new Launcher(
+            {
               name: "",
               directory: "",
               command: ""
             } as LauncherConfig,
-            process: {} as LauncherProcess
-          }
+            {} as LauncherProcess
+          )
         ],
         activeLauncherIndex: newIndex
       },
@@ -271,16 +270,12 @@ export class App extends React.Component<{}, AppState> {
 
     // Fill initial value of launcherProcesses
     this.state.launchers = launcherConfigs.map((launcherConfig, i) => {
-      return {
-        key: i,
-        config: launcherConfig,
-        process: {
-          stdout: "",
-          stderr: "",
-          log: "",
-          processState: ProcessState.Stopped
-        } as LauncherProcess
-      } as Launcher;
+      return new Launcher(launcherConfig, {
+        stdout: "",
+        stderr: "",
+        log: "",
+        processState: ProcessState.Stopped
+      } as LauncherProcess);
     });
   }
 

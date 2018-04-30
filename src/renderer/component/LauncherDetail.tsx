@@ -48,18 +48,14 @@ export class LauncherDetail extends React.Component<
     this.handleCommandChange = this.handleCommandChange.bind(this);
   }
 
+  componentWillMount() {
+    this.initLauncher(this.props.launcher);
+  }
+
   componentWillReceiveProps(nextProps: LauncherDetailProps) {
     if (nextProps.launcher.key !== this.props.launcher.key) {
       // Reset edit state
-      const isNew = nextProps.launcher.config.name === "";
-      this.setState(
-        Object.assign({}, this.state, {
-          isEditing: isNew,
-          unsavedName: nextProps.launcher.config.name,
-          unsavedDirectory: nextProps.launcher.config.directory,
-          unsavedCommand: nextProps.launcher.config.command
-        })
-      );
+      this.initLauncher(nextProps.launcher);
     }
   }
 
@@ -105,6 +101,18 @@ export class LauncherDetail extends React.Component<
     }
 
     this.logElement.scrollTop = this.logElement.scrollHeight;
+  }
+
+  initLauncher(launcher: Launcher) {
+    const isNew = launcher.config.name === "";
+    this.setState(
+      Object.assign({}, this.state, {
+        isEditing: isNew,
+        unsavedName: launcher.config.name,
+        unsavedDirectory: launcher.config.directory,
+        unsavedCommand: launcher.config.command
+      })
+    );
   }
 
   beginEdit() {
