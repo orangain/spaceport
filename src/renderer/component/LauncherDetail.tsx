@@ -305,7 +305,13 @@ export class LauncherDetail extends React.Component<
           <div className="launcher-detail-container">
             <div className="metadata">
               <div className="top">
-                <h3>{this.props.launcher.config.name}</h3>
+                <h3>
+                  {this.props.launcher.config.name !== "" ? (
+                    this.props.launcher.config.name
+                  ) : (
+                    <span className="text-muted">(名称未設定)</span>
+                  )}
+                </h3>
                 <div>
                   <button className="btn btn-default" onClick={this.beginEdit}>
                     <span className="icon icon-pencil" /> 編集
@@ -317,11 +323,17 @@ export class LauncherDetail extends React.Component<
               </div>
               <div>
                 <code>
-                  <pre>{this.props.launcher.config.command}</pre>
+                  {this.props.launcher.config.command !== "" ? (
+                    <pre>this.props.launcher.config.command</pre>
+                  ) : (
+                    <span className="text-muted">(コマンド未設定)</span>
+                  )}
                 </code>
               </div>
               <div>
-                {actionButtons(this.props.launcher.process.processState)}
+                {this.props.launcher.config.command !== ""
+                  ? actionButtons(this.props.launcher.process.processState)
+                  : null}
               </div>
             </div>
             <div>

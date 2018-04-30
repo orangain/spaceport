@@ -201,7 +201,7 @@ export class App extends React.Component<{}, AppState> {
           new Launcher(
             {
               name: "",
-              directory: "",
+              directory: "~",
               command: ""
             } as LauncherConfig,
             {} as LauncherProcess

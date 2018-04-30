@@ -73,7 +73,11 @@ export class LauncherList extends React.Component<LauncherListProps, {}> {
                         : "stopped")
                     }
                   />{" "}
-                  {launcher.config.name}
+                  {launcher.config.name !== "" ? (
+                    launcher.config.name
+                  ) : (
+                    <span className="text-muted">(名称未設定)</span>
+                  )}
                 </h4>
                 <p>{launcher.config.directory}</p>
               </div>
