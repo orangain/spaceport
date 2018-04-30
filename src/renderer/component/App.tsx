@@ -296,7 +296,7 @@ export class App extends React.Component<{}, AppState> {
             </div>
             <div className="pane">
               {activeLauncher === undefined ? (
-                <div className="launcher-detail">
+                <div className="launcher-detail-empty">
                   <p>コマンドを追加してください。</p>
                 </div>
               ) : (
