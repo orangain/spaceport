@@ -8,7 +8,7 @@ export interface LauncherListProps {
   launchers: Launcher[];
   activeLauncherIndex: number;
   activate: (index: number) => any;
-  removeLauncher: (index: number) => void;
+  removeLauncher: (launcher: Launcher) => void;
 }
 
 export class LauncherList extends React.Component<LauncherListProps, {}> {
@@ -20,6 +20,7 @@ export class LauncherList extends React.Component<LauncherListProps, {}> {
   showContextMenu(index: number, e: React.MouseEvent<HTMLLIElement>) {
     e.preventDefault();
 
+    const launcher = this.props.launchers[index];
     const Menu = remote.Menu;
     const MenuItem = remote.MenuItem;
     const menu = new Menu();
@@ -27,12 +28,8 @@ export class LauncherList extends React.Component<LauncherListProps, {}> {
       new MenuItem({
         label: "削除",
         click: () => {
-          const launcherConfig = this.props.launchers[index].config;
-          if (
-            launcherConfig.name !== "" ||
-            launcherConfig.directory !== "" ||
-            launcherConfig.command !== ""
-          ) {
+          const launcherConfig = launcher.config;
+          if (launcherConfig.command !== "") {
             if (
               !confirm(
                 `本当に ${launcherConfig.name} を削除してもよろしいですか？`
@@ -42,7 +39,7 @@ export class LauncherList extends React.Component<LauncherListProps, {}> {
             }
           }
 
-          this.props.removeLauncher(index);
+          this.props.removeLauncher(launcher);
         }
       })
     );

@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { Launcher, ProcessState, LauncherConfig } from "../models";
+import { Launcher, ProcessState } from "../models";
 
 import "./LauncherDetail.scss";
 
@@ -9,7 +9,7 @@ export interface LauncherDetailProps {
   startScript: (launcher: Launcher) => any;
   stopScript: (launcher: Launcher, restart?: boolean) => any;
   restartScript: (launcher: Launcher) => any;
-  updateLauncherConfig: (launcher: Launcher, config: LauncherConfig) => any;
+  beginEdit: () => void;
 }
 
 export interface LauncherDetailState {
@@ -37,26 +37,6 @@ export class LauncherDetail extends React.Component<
     super(props, context);
     this.setLogElementRef = this.setLogElementRef.bind(this);
     this.scrollLogBottomIfNeeded = this.scrollLogBottomIfNeeded.bind(this);
-    this.beginEdit = this.beginEdit.bind(this);
-    this.endEdit = this.endEdit.bind(this);
-    this.cancelEdit = this.cancelEdit.bind(this);
-    this.updateDirectoryInput = this.updateDirectoryInput.bind(this);
-    this.openDirectoryDialog = this.openDirectoryDialog.bind(this);
-    this.handleNameChange = this.handleNameChange.bind(this);
-    this.handleDirectoryChange = this.handleDirectoryChange.bind(this);
-    this.handleDirectorySelect = this.handleDirectorySelect.bind(this);
-    this.handleCommandChange = this.handleCommandChange.bind(this);
-  }
-
-  componentWillMount() {
-    this.initLauncher(this.props.launcher);
-  }
-
-  componentWillReceiveProps(nextProps: LauncherDetailProps) {
-    if (nextProps.launcher.key !== this.props.launcher.key) {
-      // Reset edit state
-      this.initLauncher(nextProps.launcher);
-    }
   }
 
   componentWillUpdate(
@@ -103,108 +83,6 @@ export class LauncherDetail extends React.Component<
     this.logElement.scrollTop = this.logElement.scrollHeight;
   }
 
-  initLauncher(launcher: Launcher) {
-    const isNew = launcher.config.name === "";
-    this.setState(
-      Object.assign({}, this.state, {
-        isEditing: isNew,
-        unsavedName: launcher.config.name,
-        unsavedDirectory: launcher.config.directory,
-        unsavedCommand: launcher.config.command
-      })
-    );
-  }
-
-  beginEdit() {
-    this.setState(
-      Object.assign({}, this.state, {
-        isEditing: true,
-        unsavedName: this.props.launcher.config.name,
-        unsavedDirectory: this.props.launcher.config.directory,
-        unsavedCommand: this.props.launcher.config.command
-      })
-    );
-  }
-
-  endEdit() {
-    this.setState(
-      Object.assign({}, this.state, {
-        isEditing: false
-      })
-    );
-
-    const launcher = this.props.launcher;
-    this.props.updateLauncherConfig(
-      launcher,
-      Object.assign({}, launcher.config, {
-        name: this.state.unsavedName,
-        directory: this.state.unsavedDirectory,
-        command: this.state.unsavedCommand
-      })
-    );
-  }
-
-  cancelEdit() {
-    this.setState(
-      Object.assign({}, this.state, {
-        isEditing: false
-      })
-    );
-  }
-
-  updateDirectoryInput(input: HTMLInputElement | null) {
-    this.directoryInput = input;
-    if (input !== null) {
-      // Set attribute here because setting webkitdirectory attribute in JSX causes TypeScript error.
-      input.webkitdirectory = true;
-    }
-  }
-
-  openDirectoryDialog() {
-    (this.directoryInput as HTMLInputElement).click();
-  }
-
-  handleNameChange(e: any) {
-    this.setState(
-      Object.assign({}, this.state, {
-        unsavedName: e.target.value
-      })
-    );
-  }
-
-  handleDirectoryChange(e: any) {
-    this.setState(
-      Object.assign({}, this.state, {
-        unsavedDirectory: e.dataTransfer
-          ? e.dataTransfer.files[0].path
-          : e.target.value
-      })
-    );
-  }
-
-  handleDirectorySelect(e: any) {
-    const files = (this.directoryInput as HTMLInputElement).files;
-    if (files !== null && files.length > 0) {
-      let path = files[0].path;
-      if (process.env.HOME && path.startsWith(process.env.HOME)) {
-        path = "~" + path.slice(process.env.HOME.length);
-      }
-      this.setState(
-        Object.assign({}, this.state, {
-          unsavedDirectory: path
-        })
-      );
-    }
-  }
-
-  handleCommandChange(e: any) {
-    this.setState(
-      Object.assign({}, this.state, {
-        unsavedCommand: e.target.value
-      })
-    );
-  }
-
   render() {
     const actionButtons = (processState: ProcessState) => {
       switch (processState) {
@@ -245,105 +123,50 @@ export class LauncherDetail extends React.Component<
 
     return (
       <div className="launcher-detail">
-        {this.state.isEditing ? (
-          <form
-            onSubmit={e => {
-              e.preventDefault();
-              this.endEdit();
-            }}
-          >
-            <div className="form-group">
-              <label>名前</label>
-              <input
-                autoFocus
-                className="form-control"
-                value={this.state.unsavedName}
-                onChange={this.handleNameChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>ディレクトリ</label>
-              <div className="form-row">
-                <input
-                  className="form-control"
-                  value={this.state.unsavedDirectory}
-                  onChange={this.handleDirectoryChange}
-                />
+        <div className="launcher-detail-container">
+          <div className="metadata">
+            <div className="top">
+              <h3>
+                {this.props.launcher.config.name !== "" ? (
+                  this.props.launcher.config.name
+                ) : (
+                  <span className="text-muted">(名称未設定)</span>
+                )}
+              </h3>
+              <div>
                 <button
                   className="btn btn-default"
-                  type="button"
-                  onClick={this.openDirectoryDialog}
+                  onClick={this.props.beginEdit}
                 >
-                  ...
+                  <span className="icon icon-pencil" /> 編集
                 </button>
               </div>
-              <input
-                style={{ display: "none" }}
-                type="file"
-                ref={this.updateDirectoryInput}
-                onChange={this.handleDirectorySelect}
-              />
             </div>
-            <div className="form-group">
-              <label>コマンド</label>
-              <textarea
-                className="form-control"
-                value={this.state.unsavedCommand}
-                onChange={this.handleCommandChange}
-              />
-            </div>
-            <button className="btn btn-primary">保存</button>{" "}
-            <button
-              className="btn btn-default"
-              type="button"
-              onClick={this.cancelEdit}
-            >
-              キャンセル
-            </button>
-          </form>
-        ) : (
-          <div className="launcher-detail-container">
-            <div className="metadata">
-              <div className="top">
-                <h3>
-                  {this.props.launcher.config.name !== "" ? (
-                    this.props.launcher.config.name
-                  ) : (
-                    <span className="text-muted">(名称未設定)</span>
-                  )}
-                </h3>
-                <div>
-                  <button className="btn btn-default" onClick={this.beginEdit}>
-                    <span className="icon icon-pencil" /> 編集
-                  </button>
-                </div>
-              </div>
-              <div className="directory">
-                {this.props.launcher.config.directory}
-              </div>
-              <div>
-                <code>
-                  {this.props.launcher.config.command !== "" ? (
-                    <pre>this.props.launcher.config.command</pre>
-                  ) : (
-                    <span className="text-muted">(コマンド未設定)</span>
-                  )}
-                </code>
-              </div>
-              <div>
-                {this.props.launcher.config.command !== ""
-                  ? actionButtons(this.props.launcher.process.processState)
-                  : null}
-              </div>
+            <div className="directory">
+              {this.props.launcher.config.directory}
             </div>
             <div>
-              <span>Log:</span>
+              <code>
+                {this.props.launcher.config.command !== "" ? (
+                  <pre>this.props.launcher.config.command</pre>
+                ) : (
+                  <span className="text-muted">(コマンド未設定)</span>
+                )}
+              </code>
             </div>
-            <div className="log" ref={this.setLogElementRef}>
-              {this.props.launcher.process.log}
+            <div>
+              {this.props.launcher.config.command !== ""
+                ? actionButtons(this.props.launcher.process.processState)
+                : null}
             </div>
           </div>
-        )}
+          <div>
+            <span>Log:</span>
+          </div>
+          <div className="log" ref={this.setLogElementRef}>
+            {this.props.launcher.process.log}
+          </div>
+        </div>
       </div>
     );
   }

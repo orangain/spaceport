@@ -12,18 +12,21 @@ import {
 } from "../models";
 import { LauncherList } from "./LauncherList";
 import { LauncherDetail } from "./LauncherDetail";
+import { LauncherEditForm } from "./LauncherEditForm";
 import "../../../static/photon-0.1.2-dist/css/photon.min.css";
 import "./App.scss";
 
 export interface AppState {
   launchers: Launcher[];
   activeLauncherIndex: number;
+  isEditing: boolean;
 }
 
 export class App extends React.Component<{}, AppState> {
   state = {
     launchers: [] as Launcher[],
-    activeLauncherIndex: 0
+    activeLauncherIndex: 0,
+    isEditing: false
   };
 
   processes = new Map<number, ChildProcess>();
@@ -38,8 +41,12 @@ export class App extends React.Component<{}, AppState> {
     this.updateLauncherConfig = this.updateLauncherConfig.bind(this);
     this.addLauncher = this.addLauncher.bind(this);
     this.removeLauncher = this.removeLauncher.bind(this);
+    this.beginEdit = this.beginEdit.bind(this);
+    this.endEdit = this.endEdit.bind(this);
     this.onUnload = this.onUnload.bind(this);
+  }
 
+  componentWillMount() {
     this.loadLaunchers();
   }
 
@@ -187,8 +194,10 @@ export class App extends React.Component<{}, AppState> {
   }
 
   activate(index: number) {
+    const launcher = this.state.launchers[index];
     this.setState({
-      activeLauncherIndex: index
+      activeLauncherIndex: index,
+      isEditing: launcher !== undefined && launcher.config.command === ""
     });
   }
 
@@ -206,31 +215,41 @@ export class App extends React.Component<{}, AppState> {
             } as LauncherConfig,
             {} as LauncherProcess
           )
-        ],
-        activeLauncherIndex: newIndex
+        ]
       },
       () => {
         this.saveLaunchers();
+        this.activate(newIndex);
       }
     );
   }
 
-  removeLauncher(index: number) {
+  removeLauncher(launcher: Launcher) {
+    const index = this.indexOfLauncher(launcher.key);
+    const newIndex = Math.min(
+      this.state.activeLauncherIndex,
+      this.state.launchers.length - 2
+    );
     this.setState(
       {
         launchers: [
           ...this.state.launchers.slice(0, index),
           ...this.state.launchers.slice(index + 1)
-        ],
-        activeLauncherIndex: Math.min(
-          this.state.activeLauncherIndex,
-          this.state.launchers.length - 2
-        )
+        ]
       },
       () => {
         this.saveLaunchers();
+        this.activate(newIndex);
       }
     );
+  }
+
+  beginEdit() {
+    this.setState({ isEditing: true });
+  }
+
+  endEdit() {
+    this.setState({ isEditing: false });
   }
 
   getLauncherConfigsPath() {
@@ -269,14 +288,21 @@ export class App extends React.Component<{}, AppState> {
     }
 
     // Fill initial value of launcherProcesses
-    this.state.launchers = launcherConfigs.map((launcherConfig, i) => {
-      return new Launcher(launcherConfig, {
-        stdout: "",
-        stderr: "",
-        log: "",
-        processState: ProcessState.Stopped
-      } as LauncherProcess);
-    });
+    this.setState(
+      {
+        launchers: launcherConfigs.map((launcherConfig, i) => {
+          return new Launcher(launcherConfig, {
+            stdout: "",
+            stderr: "",
+            log: "",
+            processState: ProcessState.Stopped
+          } as LauncherProcess);
+        })
+      },
+      () => {
+        this.activate(0);
+      }
+    );
   }
 
   render() {
@@ -299,13 +325,20 @@ export class App extends React.Component<{}, AppState> {
                 <div className="launcher-detail-empty">
                   <p>コマンドを追加してください。</p>
                 </div>
-              ) : (
+              ) : !this.state.isEditing ? (
                 <LauncherDetail
                   launcher={activeLauncher}
                   startScript={this.startScript}
                   stopScript={this.stopScript}
                   restartScript={this.restartScript}
+                  beginEdit={this.beginEdit}
+                />
+              ) : (
+                <LauncherEditForm
+                  launcher={activeLauncher}
                   updateLauncherConfig={this.updateLauncherConfig}
+                  removeLauncher={this.removeLauncher}
+                  endEdit={this.endEdit}
                 />
               )}
             </div>
