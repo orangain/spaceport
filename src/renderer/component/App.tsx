@@ -19,14 +19,14 @@ import "./App.scss";
 export interface AppState {
   launchers: Launcher[];
   activeLauncherIndex: number;
-  isEditing: boolean;
+  editingLauncher: Launcher | null;
 }
 
 export class App extends React.Component<{}, AppState> {
   state = {
     launchers: [] as Launcher[],
     activeLauncherIndex: 0,
-    isEditing: false
+    editingLauncher: null
   };
 
   processes = new Map<number, ChildProcess>();
@@ -73,18 +73,35 @@ export class App extends React.Component<{}, AppState> {
     return this.state.launchers[this.indexOfLauncher(key)];
   }
 
+  getActiveLauncher(): Launcher {
+    return this.state.launchers[this.state.activeLauncherIndex];
+  }
+
   updateLauncher(newLauncher: Launcher, callback?: () => void) {
     const index = this.indexOfLauncher(newLauncher.key);
-    this.setState(
-      {
-        launchers: [
-          ...this.state.launchers.slice(0, index),
-          newLauncher,
-          ...this.state.launchers.slice(index + 1)
-        ]
-      },
-      callback
-    );
+    if (index >= 0) {
+      // Update
+      this.setState(
+        {
+          launchers: [
+            ...this.state.launchers.slice(0, index),
+            newLauncher,
+            ...this.state.launchers.slice(index + 1)
+          ]
+        },
+        callback
+      );
+    } else {
+      // Add
+      const newIndex = this.state.launchers.length;
+      this.setState(
+        {
+          launchers: [...this.state.launchers, newLauncher],
+          activeLauncherIndex: newIndex
+        },
+        callback
+      );
+    }
   }
 
   updateLauncherProcess(launcher: Launcher, newProcess: LauncherProcess) {
@@ -194,34 +211,23 @@ export class App extends React.Component<{}, AppState> {
   }
 
   activate(index: number) {
-    const launcher = this.state.launchers[index];
     this.setState({
-      activeLauncherIndex: index,
-      isEditing: launcher !== undefined && launcher.config.command === ""
+      activeLauncherIndex: index
     });
   }
 
   addLauncher() {
-    const newIndex = this.state.launchers.length;
-    this.setState(
+    const launcher = new Launcher(
       {
-        launchers: [
-          ...this.state.launchers,
-          new Launcher(
-            {
-              name: "",
-              directory: "~",
-              command: ""
-            } as LauncherConfig,
-            {} as LauncherProcess
-          )
-        ]
-      },
-      () => {
-        this.saveLaunchers();
-        this.activate(newIndex);
-      }
+        name: "",
+        directory: "~",
+        command: ""
+      } as LauncherConfig,
+      {} as LauncherProcess
     );
+    this.setState({
+      editingLauncher: launcher
+    });
   }
 
   removeLauncher(launcher: Launcher) {
@@ -245,11 +251,15 @@ export class App extends React.Component<{}, AppState> {
   }
 
   beginEdit() {
-    this.setState({ isEditing: true });
+    this.setState({
+      editingLauncher: this.getActiveLauncher()
+    });
   }
 
   endEdit() {
-    this.setState({ isEditing: false });
+    this.setState({
+      editingLauncher: null
+    });
   }
 
   getLauncherConfigsPath() {
@@ -306,7 +316,7 @@ export class App extends React.Component<{}, AppState> {
   }
 
   render() {
-    const activeLauncher = this.state.launchers[this.state.activeLauncherIndex];
+    const activeLauncher = this.getActiveLauncher();
 
     return (
       <div className="window">
@@ -325,20 +335,13 @@ export class App extends React.Component<{}, AppState> {
                 <div className="launcher-detail-empty">
                   <p>コマンドを追加してください。</p>
                 </div>
-              ) : !this.state.isEditing ? (
+              ) : (
                 <LauncherDetail
                   launcher={activeLauncher}
                   startScript={this.startScript}
                   stopScript={this.stopScript}
                   restartScript={this.restartScript}
                   beginEdit={this.beginEdit}
-                />
-              ) : (
-                <LauncherEditForm
-                  launcher={activeLauncher}
-                  updateLauncherConfig={this.updateLauncherConfig}
-                  removeLauncher={this.removeLauncher}
-                  endEdit={this.endEdit}
                 />
               )}
             </div>
@@ -351,6 +354,15 @@ export class App extends React.Component<{}, AppState> {
             </button>
           </div>
         </footer>
+        {this.state.editingLauncher !== null ? (
+          <dialog open>
+            <LauncherEditForm
+              launcher={this.state.editingLauncher!}
+              updateLauncherConfig={this.updateLauncherConfig}
+              endEdit={this.endEdit}
+            />
+          </dialog>
+        ) : null}
       </div>
     );
   }

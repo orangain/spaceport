@@ -7,7 +7,6 @@ import "./LauncherEditForm.scss";
 export interface LauncherEditFormProps {
   launcher: Launcher;
   updateLauncherConfig: (launcher: Launcher, config: LauncherConfig) => any;
-  removeLauncher: (launcher: Launcher) => void;
   endEdit: () => void;
 }
 
@@ -52,13 +51,11 @@ export class LauncherEditForm extends React.Component<
   }
 
   initLauncher(launcher: Launcher) {
-    this.setState(
-      Object.assign({}, this.state, {
-        unsavedName: launcher.config.name,
-        unsavedDirectory: launcher.config.directory,
-        unsavedCommand: launcher.config.command
-      })
-    );
+    this.setState({
+      unsavedName: launcher.config.name,
+      unsavedDirectory: launcher.config.directory,
+      unsavedCommand: launcher.config.command
+    });
   }
 
   save() {
@@ -75,9 +72,6 @@ export class LauncherEditForm extends React.Component<
   }
 
   cancel() {
-    if (this.props.launcher.config.command === "") {
-      this.props.removeLauncher(this.props.launcher);
-    }
     this.props.endEdit();
   }
 
@@ -136,7 +130,7 @@ export class LauncherEditForm extends React.Component<
 
   render() {
     return (
-      <div className="launcher-detail">
+      <div className="launcher-edit">
         <form
           onSubmit={e => {
             e.preventDefault();
