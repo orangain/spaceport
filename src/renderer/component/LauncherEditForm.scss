@@ -1,13 +1,9 @@
-.launcher-edit {
-  form {
-    padding: 10px;
+form {
+  .form-row {
+    display: flex;
+  }
 
-    .form-row {
-      display: flex;
-    }
-
-    textarea {
-      height: 200px;
-    }
+  textarea {
+    height: 200px;
   }
 }

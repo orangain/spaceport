@@ -4,6 +4,8 @@ import * as path from "path";
 import * as treeKill from "tree-kill";
 import { remote } from "electron";
 import { exec, ChildProcess } from "child_process";
+import Modal from "react-modal";
+
 import {
   Launcher,
   LauncherProcess,
@@ -15,6 +17,8 @@ import { LauncherDetail } from "./LauncherDetail";
 import { LauncherEditForm } from "./LauncherEditForm";
 import "../../../static/photon-0.1.2-dist/css/photon.min.css";
 import "./App.scss";
+
+Modal.setAppElement("#app");
 
 export interface AppState {
   launchers: Launcher[];
@@ -355,13 +359,16 @@ export class App extends React.Component<{}, AppState> {
           </div>
         </footer>
         {this.state.editingLauncher !== null ? (
-          <dialog open>
+          <Modal
+            isOpen={this.state.editingLauncher !== null}
+            contentLabel="Example Modal"
+          >
             <LauncherEditForm
               launcher={this.state.editingLauncher!}
               updateLauncherConfig={this.updateLauncherConfig}
               endEdit={this.endEdit}
             />
-          </dialog>
+          </Modal>
         ) : null}
       </div>
     );
