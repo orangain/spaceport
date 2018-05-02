@@ -12,11 +12,11 @@ import {
   ProcessState,
   LauncherConfig
 } from "../models";
+import "../../../static/photon-0.1.2-dist/css/photon.min.css";
+import "./App.scss";
 import { LauncherList } from "./LauncherList";
 import { LauncherDetail } from "./LauncherDetail";
 import { LauncherEditForm } from "./LauncherEditForm";
-import "../../../static/photon-0.1.2-dist/css/photon.min.css";
-import "./App.scss";
 
 Modal.setAppElement("#app");
 

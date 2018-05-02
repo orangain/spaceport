@@ -1,9 +1,11 @@
-form {
-  .form-row {
-    display: flex;
-  }
+h5 {
+  margin-top: 0;
+}
 
-  textarea {
-    height: 200px;
-  }
+.form-row {
+  display: flex;
+}
+
+textarea {
+  height: 150px;
 }
