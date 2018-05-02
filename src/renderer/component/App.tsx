@@ -34,6 +34,7 @@ export class App extends React.Component<{}, AppState> {
   };
 
   processes = new Map<number, ChildProcess>();
+  private lastKey = 0;
 
   constructor(props: {}, context?: any) {
     super(props, context);
@@ -81,9 +82,18 @@ export class App extends React.Component<{}, AppState> {
     return this.state.launchers[this.state.activeLauncherIndex];
   }
 
+  generateNewKey(): number {
+    if (this.lastKey == Number.MAX_SAFE_INTEGER) {
+      this.lastKey = -Number.MAX_SAFE_INTEGER;
+    } else {
+      this.lastKey++;
+    }
+    return this.lastKey;
+  }
+
   updateLauncher(newLauncher: Launcher, callback?: () => void) {
-    const index = this.indexOfLauncher(newLauncher.key);
-    if (index >= 0) {
+    if (newLauncher.key !== undefined) {
+      const index = this.indexOfLauncher(newLauncher.key);
       // Update
       this.setState(
         {
@@ -98,6 +108,9 @@ export class App extends React.Component<{}, AppState> {
     } else {
       // Add
       const newIndex = this.state.launchers.length;
+      newLauncher = Object.assign({}, newLauncher, {
+        key: this.generateNewKey()
+      });
       this.setState(
         {
           launchers: [...this.state.launchers, newLauncher],
@@ -128,7 +141,7 @@ export class App extends React.Component<{}, AppState> {
   }
 
   startScript(launcher: Launcher) {
-    const key = launcher.key;
+    const key = launcher.key!;
     this.updateLauncherProcess(
       launcher,
       Object.assign({}, launcher.process, {
@@ -145,7 +158,7 @@ export class App extends React.Component<{}, AppState> {
       process.env.HOME || "~"
     );
     const p = exec(launcherConfig.command, { cwd: directory });
-    this.processes.set(launcher.key, p);
+    this.processes.set(key, p);
     console.log(p.pid);
 
     p.stdout.on("data", data => {
@@ -191,7 +204,8 @@ export class App extends React.Component<{}, AppState> {
   }
 
   stopScript(launcher: Launcher, restart: boolean = false) {
-    const p = this.processes.get(launcher.key);
+    const key = launcher.key!;
+    const p = this.processes.get(key);
     if (p != null) {
       this.updateLauncherProcess(
         launcher,
@@ -206,7 +220,7 @@ export class App extends React.Component<{}, AppState> {
         console.log(err);
       });
 
-      this.processes.delete(launcher.key);
+      this.processes.delete(key);
     }
   }
 
@@ -221,21 +235,22 @@ export class App extends React.Component<{}, AppState> {
   }
 
   addLauncher() {
-    const launcher = new Launcher(
-      {
+    const launcher = {
+      config: {
         name: "",
         directory: "~",
         command: ""
       } as LauncherConfig,
-      {} as LauncherProcess
-    );
+      process: {} as LauncherProcess
+    } as Launcher;
     this.setState({
       editingLauncher: launcher
     });
   }
 
   removeLauncher(launcher: Launcher) {
-    const index = this.indexOfLauncher(launcher.key);
+    const key = launcher.key!;
+    const index = this.indexOfLauncher(key);
     const newIndex = Math.min(
       this.state.activeLauncherIndex,
       this.state.launchers.length - 2
@@ -305,12 +320,16 @@ export class App extends React.Component<{}, AppState> {
     this.setState(
       {
         launchers: launcherConfigs.map((launcherConfig, i) => {
-          return new Launcher(launcherConfig, {
-            stdout: "",
-            stderr: "",
-            log: "",
-            processState: ProcessState.Stopped
-          } as LauncherProcess);
+          return {
+            key: this.generateNewKey(),
+            config: launcherConfig,
+            process: {
+              stdout: "",
+              stderr: "",
+              log: "",
+              processState: ProcessState.Stopped
+            } as LauncherProcess
+          } as Launcher;
         })
       },
       () => {
