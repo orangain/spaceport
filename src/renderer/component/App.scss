@@ -15,18 +15,9 @@ body {
 
 #app {
   height: 100%;
-}
-
-.app {
-  display: flex;
-  height: 100%;
 
   .sidebar {
-    border-right: 1px solid gray;
-  }
-
-  .main {
-    flex-grow: 1;
+    overflow-y: auto;
   }
 }
 

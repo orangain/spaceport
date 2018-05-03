@@ -51,7 +51,9 @@
     }
 
     .log {
+      flex-basis: 100px;
       flex-grow: 1;
+      flex-shrink: 0;
       border-top: 1px solid #aaa;
       background: #eee;
       overflow-y: scroll;
