@@ -386,10 +386,7 @@ export class App extends React.Component<{}, AppState> {
           </div>
         </footer>
         {this.state.editingLauncher !== null ? (
-          <Modal
-            isOpen={this.state.editingLauncher !== null}
-            contentLabel="Example Modal"
-          >
+          <Modal isOpen={this.state.editingLauncher !== null}>
             <LauncherEditForm
               launcher={this.state.editingLauncher!}
               updateLauncherConfig={this.updateLauncherConfig}
