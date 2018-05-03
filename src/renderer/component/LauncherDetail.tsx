@@ -148,7 +148,7 @@ export class LauncherDetail extends React.Component<
             <div>
               <code>
                 {this.props.launcher.config.command !== "" ? (
-                  <pre>this.props.launcher.config.command</pre>
+                  <pre>{this.props.launcher.config.command}</pre>
                 ) : (
                   <span className="text-muted">(コマンド未設定)</span>
                 )}
