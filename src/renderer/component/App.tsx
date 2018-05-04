@@ -109,7 +109,13 @@ export class App extends React.Component<{}, AppState> {
       // Add
       const newIndex = this.state.launchers.length;
       newLauncher = Object.assign({}, newLauncher, {
-        key: this.generateNewKey()
+        key: this.generateNewKey(),
+        process: {
+          stdout: "",
+          stderr: "",
+          log: "",
+          processState: ProcessState.Stopped
+        } as LauncherProcess
       });
       this.setState(
         {
