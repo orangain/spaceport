@@ -1,7 +1,10 @@
 {
   "name": "spaceport",
+  "productName": "Spaceport",
   "version": "0.0.0",
-  "license": "MIT",
+  "private": true,
+  "author": "orangain",
+  "description": "Electron app to launch server command from GUI",
   "scripts": {
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
