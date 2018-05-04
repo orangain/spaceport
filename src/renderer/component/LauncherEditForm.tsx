@@ -153,10 +153,11 @@ export class LauncherEditForm extends React.Component<
               className="form-control"
               value={this.state.unsavedName}
               onChange={this.handleNameChange}
+              placeholder="わかりやすい名前をつけます（例: my-app）"
             />
           </div>
           <div className="form-group">
-            <label>ディレクトリ（必須）</label>
+            <label>コマンドを実行するディレクトリ（必須）</label>
             <div className="form-row">
               <input
                 className="form-control"
@@ -184,6 +185,7 @@ export class LauncherEditForm extends React.Component<
               className="form-control"
               value={this.state.unsavedCommand}
               onChange={this.handleCommandChange}
+              placeholder="実行するコマンドを入力します（例: npm start）"
             />
           </div>
           <button className="btn btn-primary" disabled={!this.isValid()}>

@@ -345,7 +345,7 @@ export class App extends React.Component<{}, AppState> {
               {activeLauncher === undefined ? (
                 <div className="launcher-detail-empty">
                   <p>
-                    まだコマンドがありません。<a
+                    Spaceportへようこそ。まずは実行するコマンドを<a
                       href="#"
                       onClick={e => {
                         e.preventDefault();
@@ -353,7 +353,7 @@ export class App extends React.Component<{}, AppState> {
                       }}
                       className="link"
                     >
-                      コマンドを追加
+                      追加
                     </a>してください。
                   </p>
                 </div>
