@@ -347,7 +347,10 @@ export class App extends React.Component<{}, AppState> {
                   <p>
                     まだコマンドがありません。<a
                       href="#"
-                      onClick={this.addLauncher}
+                      onClick={e => {
+                        e.preventDefault();
+                        this.addLauncher();
+                      }}
                       className="link"
                     >
                       コマンドを追加
