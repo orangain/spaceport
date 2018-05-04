@@ -383,7 +383,10 @@ export class App extends React.Component<{}, AppState> {
           </div>
         </footer>
         {this.state.editingLauncher !== null ? (
-          <Modal isOpen={this.state.editingLauncher !== null}>
+          <Modal
+            isOpen={this.state.editingLauncher !== null}
+            style={{ content: { backgroundColor: "#f5f5f4", padding: 0 } }}
+          >
             <LauncherEditForm
               launcher={this.state.editingLauncher!}
               updateLauncherConfig={this.updateLauncherConfig}

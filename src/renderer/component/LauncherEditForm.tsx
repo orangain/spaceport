@@ -137,9 +137,11 @@ export class LauncherEditForm extends React.Component<
   render() {
     return (
       <div className="launcher-edit">
-        <h5>
-          コマンドの{this.props.launcher.key === undefined ? "追加" : "編集"}
-        </h5>
+        <header className="toolbar toolbar-header">
+          <h1 className="title">
+            コマンドの{this.props.launcher.key === undefined ? "追加" : "編集"}
+          </h1>
+        </header>
         <form
           onSubmit={e => {
             e.preventDefault();
