@@ -114,6 +114,7 @@ export class App extends React.Component<{}, AppState> {
           stdout: "",
           stderr: "",
           log: "",
+          logElements: [] as React.ReactNode[],
           processState: ProcessState.Stopped
         } as LauncherProcess
       });
@@ -154,6 +155,7 @@ export class App extends React.Component<{}, AppState> {
         stdout: "",
         stderr: "",
         log: "",
+        logElements: [] as React.ReactNode[],
         processState: ProcessState.Running
       } as LauncherProcess)
     );
@@ -168,26 +170,40 @@ export class App extends React.Component<{}, AppState> {
     console.log(p.pid);
 
     p.stdout.on("data", data => {
-      console.log(`stdout: ${data}`);
+      console.log(`stdout: ${require("util").inspect(data)}`);
       // launcher object in parent scope may no longer be what you expected
       const launcher = this.getLauncherByKey(key);
       this.updateLauncherProcess(
         launcher,
         Object.assign({}, launcher.process, {
           stdout: launcher.process.stdout + data,
-          log: launcher.process.log + data
+          log: launcher.process.log + data,
+          logElements: [
+            ...launcher.process.logElements,
+            this.toLogElements(
+              data as string,
+              launcher.process.logElements.length
+            )
+          ]
         })
       );
     });
 
     p.stderr.on("data", data => {
-      console.log(`stderr: ${data}`);
+      console.log(`stderr: ${require("util").inspect(data)}`);
       const launcher = this.getLauncherByKey(key);
       this.updateLauncherProcess(
         launcher,
         Object.assign({}, launcher.process, {
           stderr: launcher.process.stderr + data,
-          log: launcher.process.log + data
+          log: launcher.process.log + data,
+          logElements: [
+            ...launcher.process.logElements,
+            this.toLogElements(
+              data as string,
+              launcher.process.logElements.length
+            )
+          ]
         })
       );
     });
@@ -232,6 +248,21 @@ export class App extends React.Component<{}, AppState> {
 
   restartScript(launcher: Launcher) {
     this.stopScript(launcher, true);
+  }
+
+  toLogElements(log: string, keyStartIndex: number): React.ReactNode[] {
+    let elements: React.ReactNode[] = [];
+
+    const lineBreakRegex = /(\r\n|\n)/;
+    elements = log.split(lineBreakRegex).map((line, i) => {
+      if (line.match(lineBreakRegex)) {
+        return <br key={keyStartIndex + i} />;
+      } else {
+        return line;
+      }
+    });
+
+    return elements;
   }
 
   activate(index: number) {

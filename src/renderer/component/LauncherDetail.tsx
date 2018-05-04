@@ -164,7 +164,7 @@ export class LauncherDetail extends React.Component<
             <span>Log:</span>
           </div>
           <div className="log" ref={this.setLogElementRef}>
-            {this.props.launcher.process.log}
+            {this.props.launcher.process.logElements}
           </div>
         </div>
       </div>

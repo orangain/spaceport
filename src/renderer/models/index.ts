@@ -21,6 +21,7 @@ export interface LauncherProcess {
   stdout: string;
   stderr: string;
   log: string;
+  logElements: React.ReactNode[];
   processState: ProcessState;
   restarting: boolean;
 }
