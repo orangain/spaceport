@@ -128,6 +128,12 @@ export class LauncherEditForm extends React.Component<
     );
   }
 
+  isValid(): boolean {
+    return (
+      this.state.unsavedDirectory !== "" && this.state.unsavedCommand !== ""
+    );
+  }
+
   render() {
     return (
       <div className="launcher-edit">
@@ -150,7 +156,7 @@ export class LauncherEditForm extends React.Component<
             />
           </div>
           <div className="form-group">
-            <label>ディレクトリ</label>
+            <label>ディレクトリ（必須）</label>
             <div className="form-row">
               <input
                 className="form-control"
@@ -173,14 +179,16 @@ export class LauncherEditForm extends React.Component<
             />
           </div>
           <div className="form-group">
-            <label>コマンド</label>
+            <label>コマンド（必須）</label>
             <textarea
               className="form-control"
               value={this.state.unsavedCommand}
               onChange={this.handleCommandChange}
             />
           </div>
-          <button className="btn btn-primary">保存</button>{" "}
+          <button className="btn btn-primary" disabled={!this.isValid()}>
+            保存
+          </button>{" "}
           <button
             className="btn btn-default"
             type="button"

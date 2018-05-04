@@ -2,10 +2,29 @@ h5 {
   margin-top: 0;
 }
 
+label {
+  margin: 0;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
 .form-row {
   display: flex;
 }
 
 textarea {
   height: 150px;
+}
+
+.btn-primary[disabled] {
+  color: lighten(#333, 40%);
+  border-color: lighten(#c2c0c2, 10%) lighten(#c2c0c2, 10%)
+    lighten(#a19fa1, 10%);
+  background-image: linear-gradient(
+    to bottom,
+    darken(#fcfcfc, 10%),
+    darken(#f1f1f1, 10%)
+  );
 }
