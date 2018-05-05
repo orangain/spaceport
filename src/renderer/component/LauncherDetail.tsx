@@ -107,6 +107,7 @@ export class LauncherDetail extends React.Component<
               >
                 <span className="icon icon-stop" /> 停止
               </button>
+              &nbsp;
               <button
                 type="button"
                 className="btn btn-warning"
