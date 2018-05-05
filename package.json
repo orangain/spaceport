@@ -1,7 +1,7 @@
 {
   "name": "spaceport",
   "productName": "Spaceport",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "author": "orangain",
   "description": "Electron app to launch server command from GUI",
