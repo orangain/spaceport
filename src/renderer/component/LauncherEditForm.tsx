@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as path from "path";
 
 import { Launcher, LauncherConfig } from "../models";
 
@@ -108,13 +109,17 @@ export class LauncherEditForm extends React.Component<
   handleDirectorySelect(e: any) {
     const files = (this.directoryInput as HTMLInputElement).files;
     if (files !== null && files.length > 0) {
-      let path = files[0].path;
-      if (process.env.HOME && path.startsWith(process.env.HOME)) {
-        path = "~" + path.slice(process.env.HOME.length);
+      let selectedPath = files[0].path;
+      if (process.env.HOME && selectedPath.startsWith(process.env.HOME)) {
+        selectedPath = "~" + selectedPath.slice(process.env.HOME.length);
       }
       this.setState(
         Object.assign({}, this.state, {
-          unsavedDirectory: path
+          unsavedName:
+            this.state.unsavedName !== ""
+              ? this.state.unsavedName
+              : path.basename(selectedPath),
+          unsavedDirectory: selectedPath
         })
       );
     }
