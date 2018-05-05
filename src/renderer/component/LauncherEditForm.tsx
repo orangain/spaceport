@@ -89,21 +89,17 @@ export class LauncherEditForm extends React.Component<
   }
 
   handleNameChange(e: any) {
-    this.setState(
-      Object.assign({}, this.state, {
-        unsavedName: e.target.value
-      })
-    );
+    this.setState({
+      unsavedName: e.target.value
+    });
   }
 
   handleDirectoryChange(e: any) {
-    this.setState(
-      Object.assign({}, this.state, {
-        unsavedDirectory: e.dataTransfer
-          ? e.dataTransfer.files[0].path
-          : e.target.value
-      })
-    );
+    this.setState({
+      unsavedDirectory: e.dataTransfer
+        ? e.dataTransfer.files[0].path
+        : e.target.value
+    });
   }
 
   handleDirectorySelect(e: any) {
@@ -113,24 +109,20 @@ export class LauncherEditForm extends React.Component<
       if (process.env.HOME && selectedPath.startsWith(process.env.HOME)) {
         selectedPath = "~" + selectedPath.slice(process.env.HOME.length);
       }
-      this.setState(
-        Object.assign({}, this.state, {
-          unsavedName:
-            this.state.unsavedName !== ""
-              ? this.state.unsavedName
-              : path.basename(selectedPath),
-          unsavedDirectory: selectedPath
-        })
-      );
+      this.setState({
+        unsavedName:
+          this.state.unsavedName !== ""
+            ? this.state.unsavedName
+            : path.basename(selectedPath),
+        unsavedDirectory: selectedPath
+      });
     }
   }
 
   handleCommandChange(e: any) {
-    this.setState(
-      Object.assign({}, this.state, {
-        unsavedCommand: e.target.value
-      })
-    );
+    this.setState({
+      unsavedCommand: e.target.value
+    });
   }
 
   isValid(): boolean {
