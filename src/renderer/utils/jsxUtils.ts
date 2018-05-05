@@ -18,11 +18,11 @@ function toLogElements(log: string): React.ReactNode[] {
   let elements: React.ReactNode[] = [];
 
   const lineBreakRegex = /(\r\n|\n)/;
-  elements = log.split(lineBreakRegex).map(line => {
+  log.split(lineBreakRegex).forEach(line => {
     if (line.match(lineBreakRegex)) {
-      return <br />;
+      elements.push(React.createElement("br"));
     } else {
-      return line;
+      elements.push(line);
     }
   });
 
