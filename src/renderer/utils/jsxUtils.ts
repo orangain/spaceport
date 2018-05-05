@@ -1,4 +1,5 @@
 import * as React from "react";
+import { remote } from "electron";
 
 export function extendLogElements(
   logElements: React.ReactNode[],
@@ -22,9 +23,42 @@ function toLogElements(log: string): React.ReactNode[] {
     if (line.match(lineBreakRegex)) {
       elements.push(React.createElement("br"));
     } else {
-      elements.push(line);
+      autoLink(line).forEach(e => {
+        elements.push(e);
+      });
     }
   });
 
   return elements;
+}
+
+function autoLink(line: string): React.ReactNode[] {
+  let elements: React.ReactNode[] = [];
+
+  const urlRegex = /(https?:\/\/\S+)/;
+  line.split(urlRegex).forEach(piece => {
+    if (piece.match(urlRegex)) {
+      elements.push(
+        React.createElement(
+          "a",
+          {
+            className: "link",
+            onClick: e => {
+              e.preventDefault();
+              onClickLink(piece);
+            }
+          },
+          piece
+        )
+      );
+    } else {
+      elements.push(piece);
+    }
+  });
+
+  return elements;
+}
+
+function onClickLink(url: string) {
+  remote.shell.openExternal(url);
 }
