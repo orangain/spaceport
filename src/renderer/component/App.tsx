@@ -12,6 +12,7 @@ import {
   ProcessState,
   LauncherConfig
 } from "../models";
+import { extendLogElements } from "../utils/jsxUtils";
 import "../../../static/photon-0.1.2-dist/css/photon.min.css";
 import "./App.scss";
 import { LauncherList } from "./LauncherList";
@@ -178,13 +179,10 @@ export class App extends React.Component<{}, AppState> {
         Object.assign({}, launcher.process, {
           stdout: launcher.process.stdout + data,
           log: launcher.process.log + data,
-          logElements: [
-            ...launcher.process.logElements,
-            this.toLogElements(
-              data as string,
-              launcher.process.logElements.length
-            )
-          ]
+          logElements: extendLogElements(
+            launcher.process.logElements,
+            data as string
+          )
         })
       );
     });
@@ -197,13 +195,10 @@ export class App extends React.Component<{}, AppState> {
         Object.assign({}, launcher.process, {
           stderr: launcher.process.stderr + data,
           log: launcher.process.log + data,
-          logElements: [
-            ...launcher.process.logElements,
-            this.toLogElements(
-              data as string,
-              launcher.process.logElements.length
-            )
-          ]
+          logElements: extendLogElements(
+            launcher.process.logElements,
+            data as string
+          )
         })
       );
     });
@@ -248,21 +243,6 @@ export class App extends React.Component<{}, AppState> {
 
   restartScript(launcher: Launcher) {
     this.stopScript(launcher, true);
-  }
-
-  toLogElements(log: string, keyStartIndex: number): React.ReactNode[] {
-    let elements: React.ReactNode[] = [];
-
-    const lineBreakRegex = /(\r\n|\n)/;
-    elements = log.split(lineBreakRegex).map((line, i) => {
-      if (line.match(lineBreakRegex)) {
-        return <br key={keyStartIndex + i} />;
-      } else {
-        return line;
-      }
-    });
-
-    return elements;
   }
 
   activate(index: number) {
