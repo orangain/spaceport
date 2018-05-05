@@ -71,12 +71,12 @@ export class App extends React.Component<{}, AppState> {
     });
   }
 
-  indexOfLauncher(key: number) {
+  indexOfLauncher(key: number): number {
     return this.state.launchers.findIndex(launcher => launcher.key === key);
   }
 
-  getLauncherByKey(key: number) {
-    return this.state.launchers[this.indexOfLauncher(key)];
+  getLauncherByKey(key: number): Launcher | null {
+    return this.state.launchers[this.indexOfLauncher(key)] || null;
   }
 
   getActiveLauncher(): Launcher {
@@ -173,7 +173,7 @@ export class App extends React.Component<{}, AppState> {
     p.stdout.on("data", data => {
       console.log(`stdout: ${require("util").inspect(data)}`);
       // launcher object in parent scope may no longer be what you expected
-      const launcher = this.getLauncherByKey(key);
+      const launcher = this.getLauncherByKey(key)!;
       this.updateLauncherProcess(
         launcher,
         Object.assign({}, launcher.process, {
@@ -189,7 +189,7 @@ export class App extends React.Component<{}, AppState> {
 
     p.stderr.on("data", data => {
       console.log(`stderr: ${require("util").inspect(data)}`);
-      const launcher = this.getLauncherByKey(key);
+      const launcher = this.getLauncherByKey(key)!;
       this.updateLauncherProcess(
         launcher,
         Object.assign({}, launcher.process, {
@@ -206,6 +206,10 @@ export class App extends React.Component<{}, AppState> {
     p.on("close", code => {
       console.log(`child process exited with code ${code}`);
       const launcher = this.getLauncherByKey(key);
+
+      if (launcher === null) {
+        return; // Already removed
+      }
 
       if (launcher.process.restarting) {
         this.startScript(launcher);
@@ -266,6 +270,8 @@ export class App extends React.Component<{}, AppState> {
   }
 
   removeLauncher(launcher: Launcher) {
+    this.stopScript(launcher); // Ensure to stop script before removing
+
     const key = launcher.key!;
     const index = this.indexOfLauncher(key);
     const newIndex = Math.min(
